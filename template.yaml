@@ -15,7 +15,7 @@ Resources:
         S3Event:
           Type: S3
           Properties:
-            Bucket: your-s3-bucket-name
+            Bucket: language-bucket-liam-idrovo
             Events:
               - s3:ObjectCreated:*
 
