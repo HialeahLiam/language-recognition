@@ -5,8 +5,8 @@ Resources:
   MyLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: my-lambda-function
-      Handler: my-language-lambda.lambda_handler
+      FunctionName: audio-transcription
+      Handler: audio_transcription.lambda_handler
       Runtime: python3.10
       CodeUri: ./serverless
       MemorySize: 128
@@ -19,7 +19,7 @@ Resources:
 
 Outputs:
   MyLambdaFunctionOutput:
-    Value: !Ref MyLambdaFunction
+    Value: !Ref AudioTranscriptionFunction
 
   MyS3BucketOutput:
     Value: !Ref MyS3Bucket

@@ -2,7 +2,10 @@ import boto3
 
 
 def lambda_handler(event, context):
-    s3_bucket_name = "s3 bucket"  # Replace with your S3 bucket name
+    wav_file = event["wav_file"]
+    mp4_file = event["mp4_file"]
+
+    return "thanks!"
 
     # Create an S3 client
     s3_client = boto3.client("s3")
