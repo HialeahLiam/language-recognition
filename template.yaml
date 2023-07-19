@@ -11,8 +11,15 @@ Resources:
       CodeUri: ./serverless
       MemorySize: 128
       Timeout: 10
+      Events:
+        S3Event:
+          Type: S3
+          Properties:
+            Bucket: your-s3-bucket-name
+            Events:
+              - s3:ObjectCreated:*
 
-  MyS3Bucket:
+  FilmAndAudioBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: language-bucket-liam-idrovo
@@ -22,4 +29,4 @@ Outputs:
     Value: !Ref AudioTranscriptionFunction
 
   MyS3BucketOutput:
-    Value: !Ref MyS3Bucket
+    Value: !Ref FilmAndAudioBucket

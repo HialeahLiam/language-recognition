@@ -2,10 +2,14 @@ import boto3
 
 
 def lambda_handler(event, context):
-    wav_file = event["wav_file"]
-    mp4_file = event["mp4_file"]
+    print("event:", event)
 
-    return "thanks!"
+    return {
+        "statusCode": 200,
+        "body": {
+            "message": "File uploaded successfully",
+        },
+    }
 
     # Create an S3 client
     s3_client = boto3.client("s3")
