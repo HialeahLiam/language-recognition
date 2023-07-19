@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  MyLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: my-lambda-function
+      Handler: my-language-lambda.lambda_handler
+      Runtime: python3.10
+      CodeUri: ./serverless
+      MemorySize: 128
+      Timeout: 10
+
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: language-bucket-liam-idrovo
+
+Outputs:
+  MyLambdaFunctionOutput:
+    Value: !Ref MyLambdaFunction
+
+  MyS3BucketOutput:
+    Value: !Ref MyS3Bucket
