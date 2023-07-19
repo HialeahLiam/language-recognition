@@ -15,7 +15,7 @@ Resources:
         S3Event:
           Type: S3
           Properties:
-            Bucket: language-bucket-liam-idrovo
+            Bucket: !Ref FilmAndAudioBucket
             Events:
               - s3:ObjectCreated:*
 
