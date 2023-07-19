@@ -27,12 +27,12 @@ jobs:
         run: |
           aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
           aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-          cd path/to/your/lambda/function
+          cd serverless/my-language-lambda.py
 
           # Check if S3 bucket exists
-          if ! aws s3api head-bucket --bucket your-s3-bucket-name 2>/dev/null; then
+          if ! aws s3api head-bucket --bucket language-bucket 2>/dev/null; then
             echo "S3 bucket does not exist. Creating..."
-            aws s3api create-bucket --bucket your-s3-bucket-name --region your-region
+            aws s3api create-bucket --bucket language-bucket --region us-east-1
           fi
 
-          sam deploy --no-confirm-changeset --stack-name your-stack-name --s3-bucket your-s3-bucket-name --capabilities CAPABILITY_IAM
+          sam deploy --no-confirm-changeset --stack-name language-recognition --s3-bucket language-bucket --capabilities CAPABILITY_IAM
