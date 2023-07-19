@@ -1,0 +1,40 @@
+name: Deploy Lambda Function
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+
+      - name: Install AWS CLI and AWS SAM CLI
+        run: |
+          pip install awscli aws-sam-cli
+
+      - name: Deploy Lambda function and S3 bucket
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          cd path/to/your/lambda/function
+
+          # Check if S3 bucket exists
+          if ! aws s3api head-bucket --bucket your-s3-bucket-name 2>/dev/null; then
+            echo "S3 bucket does not exist. Creating..."
+            aws s3api create-bucket --bucket your-s3-bucket-name --region your-region
+          fi
+
+          sam deploy --no-confirm-changeset --stack-name your-stack-name --s3-bucket your-s3-bucket-name --capabilities CAPABILITY_IAM
