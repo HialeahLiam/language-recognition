@@ -5,7 +5,7 @@ import ffmpeg
 def lambda_handler(event, context):
     print("event:", event)
 
-    objectKey = event["Records"]["s3"]["object"]["key"]
+    objectKey = event["Records"][0]["object"]["key"]
 
     return {
         "statusCode": 200,
