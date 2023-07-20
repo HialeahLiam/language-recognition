@@ -28,6 +28,7 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: language-bucket-liam-idrovo
+    DeletionPolicy: Retain
 
 Outputs:
   MyLambdaFunctionOutput:
