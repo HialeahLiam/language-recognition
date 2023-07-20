@@ -1,5 +1,4 @@
 import boto3
-import ffmpeg
 import requests
 
 
@@ -7,11 +6,9 @@ def lambda_handler(event, context):
     # print("event:", event)
 
     # objectKey = event["Records"][0]["s3"]["object"]["key"]
-    url = "http://localhost:3000/api/transcribe"  # Replace with the actual URL you want to send the request to
+    url = "https://language-recognition.vercel.app/api/transcribe"  # Replace with the actual URL you want to send the request to
 
-    data = {"key1": "value1", "key2": "value2"}
-
-    response = requests.post(url, data=data)
+    response = requests.post(url)
 
     return {
         "statusCode": 200,
