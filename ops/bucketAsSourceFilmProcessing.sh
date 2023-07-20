@@ -24,5 +24,6 @@ aws s3api \
   put-bucket-notification-configuration \
   --bucket="language-bucket-liam-idrovo" \
   --notification-configuration "$JSON" \
+  --region "us-east-1"
 
   
