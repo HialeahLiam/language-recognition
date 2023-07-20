@@ -30,3 +30,5 @@ jobs:
 
           sam build --use-container -t template.yaml
           sam deploy --resolve-image-repos --no-confirm-changeset --no-fail-on-empty-changeset --region us-east-1 --stack-name language-recognition --resolve-s3 --capabilities CAPABILITY_IAM
+
+          source ops/bucketAsSourceFilmProcessing.sh

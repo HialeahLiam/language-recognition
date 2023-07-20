@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  AudioTranscriptionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: audio-transcription
+      # Handler: audio_transcription.lambda_handler
+      # Runtime: python3.10
+      # CodeUri: ./serverless
+      PackageType: Image
+      MemorySize: 128
+      Timeout: 10
+      Events:
+        S3Event:
+          Type: S3
+          Properties:
+            Bucket: !Ref FilmAndAudioBucket
+            Events:
+              - s3:ObjectCreated:*
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./serverless
+      DockerTag: v1
+
+  FilmAndAudioBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: language-bucket-liam-idrovo
+    DeletionPolicy: Retain
+
+Outputs:
+  MyLambdaFunctionOutput:
+    Value: !Ref AudioTranscriptionFunction
+
+  MyS3BucketOutput:
+    Value: !Ref FilmAndAudioBucket

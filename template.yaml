@@ -2,37 +2,28 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
-  AudioTranscriptionFunction:
+  FilmProcessingFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: audio-transcription
-      # Handler: audio_transcription.lambda_handler
-      # Runtime: python3.10
-      # CodeUri: ./serverless
-      PackageType: Image
+      FunctionName: film_processing
+      Handler: film_processing.lambda_handler
+      Runtime: python3.10
+      CodeUri: ./serverless
       MemorySize: 128
       Timeout: 10
-      Events:
-        S3Event:
-          Type: S3
-          Properties:
-            Bucket: !Ref FilmAndAudioBucket
-            Events:
-              - s3:ObjectCreated:*
-    Metadata:
-      Dockerfile: Dockerfile
-      DockerContext: ./serverless
-      DockerTag: v1
 
-  FilmAndAudioBucket:
-    Type: AWS::S3::Bucket
+  FilmAndAudioPermission:
+    Type: AWS::Lambda::Permission
     Properties:
-      BucketName: language-bucket-liam-idrovo
-    DeletionPolicy: Retain
+      Action: "lambda:InvokeFunction"
+      FunctionName: !Ref FilmProcessingFunction
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref "AWS::AccountId"
+      SourceArn: !Sub arn:aws:s3:::language-bucket-liam-idrovo
 
 Outputs:
   MyLambdaFunctionOutput:
-    Value: !Ref AudioTranscriptionFunction
-
-  MyS3BucketOutput:
-    Value: !Ref FilmAndAudioBucket
+    Value: !Ref FilmProcessingFunction
+  FilmProcessingFunctionArn:
+    Description: FilmProcessingFunction Arn
+    Value: !GetAtt FilmProcessingFunction.Arn
