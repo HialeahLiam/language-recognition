@@ -2,7 +2,7 @@ import boto3
 
 
 def lambda_handler(event, context):
-    print("event:", event)
+    print("event print:", event)
 
     objectKey = event["Records"][0]["s3"]["object"]["key"]
 
