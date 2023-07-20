@@ -1,11 +1,17 @@
 import boto3
 import ffmpeg
+import requests
 
 
 def lambda_handler(event, context):
-    print("event:", event)
+    # print("event:", event)
 
-    objectKey = event["Records"][0]["s3"]["object"]["key"]
+    # objectKey = event["Records"][0]["s3"]["object"]["key"]
+    url = "http://localhost:3000/api/transcribe"  # Replace with the actual URL you want to send the request to
+
+    data = {"key1": "value1", "key2": "value2"}
+
+    response = requests.post(url, data=data)
 
     return {
         "statusCode": 200,
