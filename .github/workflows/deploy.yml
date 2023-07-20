@@ -17,6 +17,7 @@ jobs:
           id: check-changes
           run: |
             # Check if directory has changes
+            echo ${{ github.event }}
             if [[ -n $(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} -- serverless/whisper/) ]]; then
               echo "Directory has changes."
               echo "::set-output name=changes::true"
