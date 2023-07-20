@@ -2,6 +2,14 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
+  AudioTranscriptionDependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: audio-transcription-dependencies-layer
+      ContentUri: ./serverless/dependencies
+    Metadata:
+      BuildMethod: python3.10
+      BuildCommand: pip install --target ./serverless/dependencies -r requirements.txt
   AudioTranscriptionFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -18,6 +26,8 @@ Resources:
             Bucket: !Ref FilmAndAudioBucket
             Events:
               - s3:ObjectCreated:*
+      Layers:
+        - !Ref AudioTranscriptionDependenciesLayer
 
   FilmAndAudioBucket:
     Type: AWS::S3::Bucket
