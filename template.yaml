@@ -25,5 +25,6 @@ Outputs:
   MyLambdaFunctionOutput:
     Value: !Ref FilmProcessingFunction
   FilmProcessingFunctionArn:
-    Description: FilmProcessingFunction Arn
     Value: !GetAtt FilmProcessingFunction.Arn
+  FilmProcessingFunctionRole:
+    Value: !Ref FilmProcessingFunctionRole
