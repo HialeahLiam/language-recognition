@@ -5,11 +5,12 @@ import { PlayIcon } from "@heroicons/react/20/solid";
 interface Props {
   snippet: {
     videoSrc: string;
+    testedWordId: string;
     words: {
+      id: string;
       text: string;
       startTime: number;
       endTime: number;
-      blank?: boolean;
     }[];
   };
 }
@@ -24,7 +25,9 @@ function PracticeA({ snippet }: Props) {
   const [guessCorrect, setGuessCorrect] = useState<boolean | null>(null);
   const video = useRef(null);
 
-  const testedWord = snippet.words.find((w) => w.blank)?.text;
+  const testedWord = snippet.words.find(
+    (w) => w.id === snippet.testedWordId
+  )?.text;
 
   function updateCurrentWord(currentTime: number) {
     const match = snippet.words.find(
@@ -33,8 +36,7 @@ function PracticeA({ snippet }: Props) {
     console.log({ match });
 
     if (match) {
-      const key = `${match.startTime}${match.endTime}`;
-      setCurrentWord(key);
+      setCurrentWord(match.id);
     }
   }
 
@@ -67,12 +69,8 @@ function PracticeA({ snippet }: Props) {
   return (
     <div className="container mx-auto sm:px-6 lg:px-8 flex flex-col items-center">
       <video
-        onProgress={() => console.log("progress")}
-        onSeeked={() => console.log("seeked")}
         onEnded={handleVideoEnd}
         ref={video}
-        controls
-        height={300}
         className="h-60 mb-20"
         src={snippet.videoSrc}
       ></video>
@@ -81,20 +79,24 @@ function PracticeA({ snippet }: Props) {
       {guessCorrect !== null && !guessCorrect && <p>Incorrect</p>}
       <p className="mb-2">
         {snippet.words.map((w) => {
-          const key = `${w.startTime}${w.endTime}`;
+          const key = w.id;
           return (
             <span
               className={`
               ${key === currentWord ? "border-b border-red-400" : ""} 
-              ${key === currentWord && !w.blank ? "text-red-500" : ""} 
-              ${w.blank ? " mx-2" : ""}
               ${
-                w.blank && !guessRevealed
+                key === currentWord && w.id !== snippet.testedWordId
+                  ? "text-red-500"
+                  : ""
+              } 
+              ${w.id === snippet.testedWordId ? " mx-2" : ""}
+              ${
+                w.id === snippet.testedWordId && !guessRevealed
                   ? "text-red-400/0 bg-gray-200 rounded"
                   : ""
               }
               ${
-                w.blank && guessRevealed
+                w.id === snippet.testedWordId && guessRevealed
                   ? `${guessCorrect ? "text-green-400" : "text-red-400"}`
                   : ""
               }
