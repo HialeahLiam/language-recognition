@@ -14,10 +14,23 @@ interface Props {
 }
 
 function PracticeA({ snippet }: Props) {
+  const [currentWord, setCurrentWord] = useState("58.7659.28");
   const [progressInterval, setProgressInterval] = useState<NodeJS.Timer | null>(
     null
   );
   const video = useRef(null);
+
+  function updateCurrentWord(currentTime: number) {
+    const match = snippet.words.find(
+      (w) => w.startTime <= currentTime && currentTime <= w.endTime
+    );
+    console.log({ match });
+
+    if (match) {
+      const key = `${match.startTime}${match.endTime}`;
+      setCurrentWord(key);
+    }
+  }
 
   function handlePlay() {
     const videoElement = video.current as unknown as HTMLVideoElement;
@@ -25,6 +38,7 @@ function PracticeA({ snippet }: Props) {
       setInterval(() => {
         console.log("inter");
         if (!videoElement.paused) {
+          updateCurrentWord(videoElement.currentTime);
           console.log(videoElement.currentTime);
         }
       }, 100)
@@ -49,6 +63,19 @@ function PracticeA({ snippet }: Props) {
         className="h-60 mb-20"
         src={snippet.videoSrc}
       ></video>
+      <p>
+        {snippet.words.map((w) => {
+          const key = `${w.startTime}${w.endTime}`;
+          return (
+            <span
+              className={`${key === currentWord ? "text-red-500" : ""}`}
+              key={key}
+            >
+              {w.text}
+            </span>
+          );
+        })}
+      </p>
       <button
         type="button"
         onClick={handlePlay}
