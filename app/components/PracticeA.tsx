@@ -13,10 +13,11 @@ interface Props {
       startTime: number;
       endTime: number;
     }[];
+    onNextSnippet: () => void;
   };
 }
 
-function PracticeA({ snippet }: Props) {
+function PracticeA({ snippet, onNextSnippet }: Props) {
   const [currentWord, setCurrentWord] = useState("");
   const [multipleChoice, setMultipleChoice] = useState(false);
   const [guessRevealed, setGuessRevealed] = useState(false);
@@ -42,6 +43,7 @@ function PracticeA({ snippet }: Props) {
   }
 
   function handleCheckGuess() {
+    if (guess === "") return;
     if (guess === testedWord) setGuessCorrect(true);
     else setGuessCorrect(false);
     setGuessRevealed(true);
@@ -64,6 +66,11 @@ function PracticeA({ snippet }: Props) {
   function handleVideoEnd() {
     if (progressInterval) clearInterval(progressInterval);
     setCurrentWord("");
+  }
+
+  function handleNeedHelp() {
+    setGuess("");
+    setMultipleChoice(true);
   }
 
   return (
@@ -156,6 +163,7 @@ function PracticeA({ snippet }: Props) {
             className="mb-4 mr-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             onChange={(e) => setGuess(e.target.value)}
             value={guess}
+            autoComplete="off"
           />
           <button
             type="button"
@@ -166,13 +174,15 @@ function PracticeA({ snippet }: Props) {
           </button>
         </div>
       )}
-      <button
-        type="button"
-        onClick={() => setMultipleChoice(true)}
-        className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-      >
-        I need help
-      </button>
+      {!multipleChoice && (
+        <button
+          type="button"
+          onClick={handleNeedHelp}
+          className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+        >
+          I need help
+        </button>
+      )}
       <button
         type="button"
         onClick={handlePlay}
@@ -180,6 +190,15 @@ function PracticeA({ snippet }: Props) {
       >
         <PlayIcon className="h-5 w-5" aria-hidden="true" />
       </button>
+      {guessRevealed && (
+        <button
+          type="button"
+          onClick={onNextSnippet}
+          className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+        >
+          Continue
+        </button>
+      )}
     </div>
   );
 }
