@@ -6,6 +6,7 @@ interface Props {
   snippet: {
     videoSrc: string;
     testedWordId: string;
+    wordChoices: string[];
     words: {
       id: string;
       text: string;
@@ -17,6 +18,7 @@ interface Props {
 
 function PracticeA({ snippet }: Props) {
   const [currentWord, setCurrentWord] = useState("");
+  const [multipleChoice, setMultipleChoice] = useState(false);
   const [guessRevealed, setGuessRevealed] = useState(false);
   const [guess, setGuess] = useState("");
   const [progressInterval, setProgressInterval] = useState<NodeJS.Timer | null>(
@@ -33,7 +35,6 @@ function PracticeA({ snippet }: Props) {
     const match = snippet.words.find(
       (w) => w.startTime <= currentTime && currentTime <= w.endTime
     );
-    console.log({ match });
 
     if (match) {
       setCurrentWord(match.id);
@@ -53,7 +54,6 @@ function PracticeA({ snippet }: Props) {
         console.log("inter");
         if (!videoElement.paused) {
           updateCurrentWord(videoElement.currentTime);
-          console.log(videoElement.currentTime);
         }
       }, 100)
     );
@@ -109,23 +109,70 @@ function PracticeA({ snippet }: Props) {
           );
         })}
       </p>
-      <div>
-        <input
-          name="guess"
-          id="guess"
-          className="mb-4 mr-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-          onChange={(e) => setGuess(e.target.value)}
-          value={guess}
-          defaultValue={""}
-        />
-        <button
-          type="button"
-          onClick={handleCheckGuess}
-          className="rounded-full bg-indigo-600 p-1 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-        >
-          Check
-        </button>
-      </div>
+      {multipleChoice ? (
+        <div>
+          <fieldset>
+            <legend className="sr-only">guess</legend>
+            <div className="space-y-5">
+              {snippet.wordChoices.map((choice) => (
+                <div key={choice} className="relative flex items-start">
+                  <div className="flex h-6 items-center">
+                    <input
+                      id={choice}
+                      aria-describedby={`${choice}-description`}
+                      onChange={(e) => setGuess(e.target.value)}
+                      name="guess"
+                      value={choice}
+                      type="radio"
+                      defaultChecked={choice === "small"}
+                      className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                    />
+                  </div>
+                  <div className="ml-3 text-sm leading-6">
+                    <label
+                      htmlFor={choice}
+                      className="font-medium text-gray-900"
+                    >
+                      {choice}
+                    </label>{" "}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </fieldset>
+          <button
+            type="button"
+            onClick={handleCheckGuess}
+            className="rounded-full bg-indigo-600 p-1 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            Check
+          </button>
+        </div>
+      ) : (
+        <div>
+          <input
+            name="guess"
+            id="guess"
+            className="mb-4 mr-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            onChange={(e) => setGuess(e.target.value)}
+            value={guess}
+          />
+          <button
+            type="button"
+            onClick={handleCheckGuess}
+            className="rounded-full bg-indigo-600 p-1 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            Check
+          </button>
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={() => setMultipleChoice(true)}
+        className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+      >
+        I need help
+      </button>
       <button
         type="button"
         onClick={handlePlay}

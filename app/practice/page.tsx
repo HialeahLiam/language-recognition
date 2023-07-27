@@ -8,6 +8,7 @@ function PracticePage() {
         videoSrc:
           "https://ddxunletf95iu.cloudfront.net/8ECB1DF8-87F9-4355-902D-5673B1D85361.mp4",
         testedWordId: "DC4801D6-550D-4478-8594-F9BC566817A5",
+        wordChoices: ["presently", "decently", "recently", "frequently"],
         words: [
           {
             id: "11455E37-ECAE-4145-857C-4359E6646E1D",
