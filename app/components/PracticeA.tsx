@@ -9,16 +9,22 @@ interface Props {
       text: string;
       startTime: number;
       endTime: number;
+      blank?: boolean;
     }[];
   };
 }
 
 function PracticeA({ snippet }: Props) {
-  const [currentWord, setCurrentWord] = useState("58.7659.28");
+  const [currentWord, setCurrentWord] = useState("");
+  const [guessRevealed, setGuessRevealed] = useState(false);
+  const [guess, setGuess] = useState("");
   const [progressInterval, setProgressInterval] = useState<NodeJS.Timer | null>(
     null
   );
+  const [guessCorrect, setGuessCorrect] = useState<boolean | null>(null);
   const video = useRef(null);
+
+  const testedWord = snippet.words.find((w) => w.blank)?.text;
 
   function updateCurrentWord(currentTime: number) {
     const match = snippet.words.find(
@@ -30,6 +36,12 @@ function PracticeA({ snippet }: Props) {
       const key = `${match.startTime}${match.endTime}`;
       setCurrentWord(key);
     }
+  }
+
+  function handleCheckGuess() {
+    if (guess === testedWord) setGuessCorrect(true);
+    else setGuessCorrect(false);
+    setGuessRevealed(true);
   }
 
   function handlePlay() {
@@ -49,6 +61,7 @@ function PracticeA({ snippet }: Props) {
 
   function handleVideoEnd() {
     if (progressInterval) clearInterval(progressInterval);
+    setCurrentWord("");
   }
 
   return (
@@ -63,12 +76,30 @@ function PracticeA({ snippet }: Props) {
         className="h-60 mb-20"
         src={snippet.videoSrc}
       ></video>
-      <p>
+
+      {guessCorrect !== null && guessCorrect && <p>Correct!</p>}
+      {guessCorrect !== null && !guessCorrect && <p>Incorrect</p>}
+      <p className="mb-2">
         {snippet.words.map((w) => {
           const key = `${w.startTime}${w.endTime}`;
           return (
             <span
-              className={`${key === currentWord ? "text-red-500" : ""}`}
+              className={`
+              ${key === currentWord ? "border-b border-red-400" : ""} 
+              ${key === currentWord && !w.blank ? "text-red-500" : ""} 
+              ${w.blank ? " mx-2" : ""}
+              ${
+                w.blank && !guessRevealed
+                  ? "text-red-400/0 bg-gray-200 rounded"
+                  : ""
+              }
+              ${
+                w.blank && guessRevealed
+                  ? `${guessCorrect ? "text-green-400" : "text-red-400"}`
+                  : ""
+              }
+              mr-1
+              `}
               key={key}
             >
               {w.text}
@@ -76,6 +107,23 @@ function PracticeA({ snippet }: Props) {
           );
         })}
       </p>
+      <div>
+        <input
+          name="guess"
+          id="guess"
+          className="mb-4 mr-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+          onChange={(e) => setGuess(e.target.value)}
+          value={guess}
+          defaultValue={""}
+        />
+        <button
+          type="button"
+          onClick={handleCheckGuess}
+          className="rounded-full bg-indigo-600 p-1 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        >
+          Check
+        </button>
+      </div>
       <button
         type="button"
         onClick={handlePlay}
