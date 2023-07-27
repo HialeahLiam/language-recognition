@@ -13,8 +13,8 @@ interface Props {
       startTime: number;
       endTime: number;
     }[];
-    onNextSnippet: () => void;
   };
+  onNextSnippet: () => void;
 }
 
 function PracticeA({ snippet, onNextSnippet }: Props) {
@@ -44,7 +44,11 @@ function PracticeA({ snippet, onNextSnippet }: Props) {
 
   function handleCheckGuess() {
     if (guess === "") return;
-    if (guess === testedWord) setGuessCorrect(true);
+    if (
+      guess.toLocaleLowerCase().trim() ===
+      testedWord?.toLocaleLowerCase().trim()
+    )
+      setGuessCorrect(true);
     else setGuessCorrect(false);
     setGuessRevealed(true);
   }
@@ -71,6 +75,18 @@ function PracticeA({ snippet, onNextSnippet }: Props) {
   function handleNeedHelp() {
     setGuess("");
     setMultipleChoice(true);
+  }
+
+  function reset() {
+    setMultipleChoice(false);
+    setGuessRevealed(false);
+    setGuess("");
+    setGuessCorrect(null);
+  }
+
+  function handleContinue() {
+    reset();
+    onNextSnippet();
   }
 
   return (
@@ -193,7 +209,7 @@ function PracticeA({ snippet, onNextSnippet }: Props) {
       {guessRevealed && (
         <button
           type="button"
-          onClick={onNextSnippet}
+          onClick={handleContinue}
           className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
         >
           Continue
