@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Symbol {
+    text                String @id
+    language            Language
+    tokens              Token[]
+    userQueueElements   UserQueueElement[]
+    snippets            Snippet[]
+}
+
+model Token {
+    text            String @id
+    symbolText      String
+    symbol          Symbol @relation(fields: [symbolText], references: [text])
+}
+
+model Snippet {
+    id              String  @id @default(cuid())
+    videoClipId     String  @unique
+    snippetUnits    SnippetUnit[]
+    symbols         Symbol[]
+}
+
+model SnippetUnit {
+    // text has close Symbol representation, but Snippet Unit is used to 
+    // render symbol on UI. Could be upper case while Symbols are lower cased.
+    // So we have text String instead of referencing Symbol
+    id              String  @id @default(cuid())
+    text            String 
+    // could be Float, but Whisper will always output as SS.SS
+    // We just convert to ms e.g. 10.24s -> 10240ms
+    startTime       Int
+    endTime         Int
+    snippetId       String
+    snippet         Snippet @relation(fields: [snippetId], references: [id])
+}
+
+model UserQueueElement {
+    userId              String @unique
+    user                User @relation(fields: [userId], references: [id])
+    dateIntroduced      DateTime
+    nextPracticeDate    DateTime
+    reviewGap           Int // in days
+    symbolText          String
+    symbol          Symbol @relation(fields: [symbolText], references: [text])
+}
+
+enum Language {
+    EN
+}
+
+model User {
+    id                      String    @id @default(cuid())
+    name                    String?
+    email                   String?   @unique
+    emailVerified           DateTime?
+    image                   String?
+    userQueueElements       UserQueueElement[]
+
+}
