@@ -25,13 +25,17 @@ export default function Home() {
         />
       </div>
 
-      <button
+      {/* <button
         onClick={() => {
           router.push("https://open.spotify.com/album/6FCzvataOZh68j8OKzOt9a");
         }}
       >
         Brand new cadillac
-      </button>
+      </button> */}
+
+      <a href="https://open.spotify.com/album/6FCzvataOZh68j8OKzOt9a">
+        Brand new cadillac
+      </a>
     </main>
   );
 }
