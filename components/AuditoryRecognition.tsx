@@ -1,6 +1,8 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { PlayIcon } from "@heroicons/react/20/solid";
+import { Button } from "./ui/button";
+import { CheckIcon } from "@radix-ui/react-icons";
 
 interface Props {
   snippet: {
@@ -136,29 +138,24 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
           value={guess}
           autoComplete="off"
         />
-        <button
-          type="button"
-          onClick={handleCheckGuess}
-          className="rounded-full bg-indigo-600 p-1 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-        >
-          Check
-        </button>
       </div>
-      <button
-        type="button"
-        onClick={handlePlay}
-        className="rounded-full bg-indigo-600 p-1 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+      <Button
+        onClick={handleCheckGuess}
+        className="rounded-full h-12 aspect-square border-2"
+        variant={"outline"}
       >
-        <PlayIcon className="h-5 w-5" aria-hidden="true" />
-      </button>
+        <CheckIcon></CheckIcon>
+      </Button>
       {guessRevealed && (
-        <button
-          type="button"
-          onClick={handleContinue}
-          className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-        >
+        // <Button
+        //   onClick={handleContinue}
+        //   className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+        // >
+        //   Continue
+        // </Button>
+        <Button onClick={handleContinue} className="">
           Continue
-        </button>
+        </Button>
       )}
     </div>
   );
