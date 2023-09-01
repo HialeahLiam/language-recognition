@@ -151,20 +151,20 @@ function PracticePage() {
     setClipIndex((ci) => ci + 1);
   }
   return (
-    <>
+    <div className="container">
       {!show ? (
         <div className="h-screen flex justify-center items-center">
           <Button onClick={() => setShow(true)}>Start practice</Button>
         </div>
       ) : (
-        <div className="mx-auto ">
+        <div className="mx-auto h-full ">
           <AuditoryRecognition
             snippet={snippets[clipIndex]}
             onNextSnippet={handleNextSnippet}
           ></AuditoryRecognition>
         </div>
       )}
-    </>
+    </div>
   );
 }
 

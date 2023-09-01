@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { PlayIcon } from "@heroicons/react/20/solid";
 import { Button } from "./ui/button";
 import { CheckIcon } from "@radix-ui/react-icons";
+import { cn } from "@/lib/utils";
 
 interface Props {
   snippet: {
@@ -23,6 +24,8 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
   const [currentWord, setCurrentWord] = useState("");
   const [guessRevealed, setGuessRevealed] = useState(false);
   const [guess, setGuess] = useState("");
+  const [snippetPlaying, setSnippetPlaying] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   // const [progressInterval, setProgressInterval] = useState<NodeJS.Timer | null>(
   //   null
   // );
@@ -57,6 +60,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
   }
 
   function handlePlay() {
+    console.log("play");
     const videoElement = video.current as unknown as HTMLVideoElement;
 
     progressIntervalRef.current = setInterval(() => {
@@ -65,11 +69,14 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
       }
     }, 100);
     videoElement.play();
+
+    setSnippetPlaying(true);
   }
 
   function handleVideoEnd() {
     if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     setCurrentWord("");
+    setSnippetPlaying(false);
   }
 
   function reset() {
@@ -85,18 +92,32 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
 
   return (
     <div className="mx-auto sm:px-6 lg:px-8 flex flex-col items-center ">
-      <video
-        onEnded={handleVideoEnd}
-        onPlay={handlePlay}
-        ref={video}
-        playsInline
-        autoPlay
-        className="h-60 mb-20"
-        src={snippet.videoSrc}
-      ></video>
+      <div className="relative mb-20 lg:h-72 aspect-video ">
+        <video
+          onEnded={handleVideoEnd}
+          onPlay={handlePlay}
+          onLoadedData={() => setVideoLoaded(true)}
+          ref={video}
+          playsInline
+          autoPlay
+          className=""
+          src={snippet.videoSrc}
+        ></video>
+        <div
+          className={cn(
+            "absolute inset-0 z-10 bg-black/50 backdrop-blur-sm flex  items-center justify-center cursor-pointer",
+            (!videoLoaded || snippetPlaying) && "hidden"
+          )}
+          onClick={handlePlay}
+        >
+          <button>
+            <PlayIcon className="fill-none stroke-white h-12"></PlayIcon>
+          </button>
+        </div>
+      </div>
       {guessCorrect !== null && guessCorrect && <p>Correct!</p>}
       {guessCorrect !== null && !guessCorrect && <p>Incorrect</p>}
-      <div className="mb-2 flex flex-wrap">
+      <div className="flex flex-wrap lg:mb-32 mb-20">
         {snippet.words.map((w) => {
           const key = w.id;
           return (
@@ -128,24 +149,27 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
           );
         })}
       </div>
-
-      <div>
+      <div className="flex items-center">
         <input
           name="guess"
           id="guess"
-          className="mb-4 mr-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+          className=" mr-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+          style={{
+            "-webkit-appearance": "none",
+          }}
           onChange={(e) => setGuess(e.target.value)}
           value={guess}
           autoComplete="off"
         />
+
+        <Button
+          onClick={handleCheckGuess}
+          className="rounded-full h-12 aspect-square border-2"
+          variant={"outline"}
+        >
+          <CheckIcon></CheckIcon>
+        </Button>
       </div>
-      <Button
-        onClick={handleCheckGuess}
-        className="rounded-full h-12 aspect-square border-2"
-        variant={"outline"}
-      >
-        <CheckIcon></CheckIcon>
-      </Button>
       {guessRevealed && (
         // <Button
         //   onClick={handleContinue}
