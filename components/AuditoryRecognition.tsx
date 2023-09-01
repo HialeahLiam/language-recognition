@@ -21,11 +21,13 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
   const [currentWord, setCurrentWord] = useState("");
   const [guessRevealed, setGuessRevealed] = useState(false);
   const [guess, setGuess] = useState("");
-  const [progressInterval, setProgressInterval] = useState<NodeJS.Timer | null>(
-    null
-  );
+  // const [progressInterval, setProgressInterval] = useState<NodeJS.Timer | null>(
+  //   null
+  // );
+
   const [guessCorrect, setGuessCorrect] = useState<boolean | null>(null);
   const video = useRef(null);
+  const progressIntervalRef = useRef<NodeJS.Timer>();
 
   const testedWord = snippet.words.find(
     (w) => w.id === snippet.testedWordId
@@ -54,19 +56,17 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
 
   function handlePlay() {
     const videoElement = video.current as unknown as HTMLVideoElement;
-    setProgressInterval(
-      setInterval(() => {
-        if (!videoElement.paused) {
-          updateCurrentWord(videoElement.currentTime);
-        }
-      }, 100)
-    );
 
+    progressIntervalRef.current = setInterval(() => {
+      if (!videoElement.paused) {
+        updateCurrentWord(videoElement.currentTime);
+      }
+    }, 100);
     videoElement.play();
   }
 
   function handleVideoEnd() {
-    if (progressInterval) clearInterval(progressInterval);
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     setCurrentWord("");
   }
 
@@ -85,6 +85,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
     <div className="container mx-auto sm:px-6 lg:px-8 flex flex-col items-center">
       <video
         onEnded={handleVideoEnd}
+        onPlay={handlePlay}
         ref={video}
         playsInline
         autoPlay

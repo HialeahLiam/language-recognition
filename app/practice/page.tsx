@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import PracticeA from "../../components/PracticeA";
 import { Button } from "@/components/ui/button";
-import { isDev } from "@/lib/utils";
+import AuditoryRecognition from "@/components/AuditoryRecognition";
 
 const snippets = [
   {
@@ -158,10 +157,10 @@ function PracticePage() {
           <Button onClick={() => setShow(true)}>Start practice</Button>
         </div>
       ) : (
-        <PracticeA
+        <AuditoryRecognition
           snippet={snippets[clipIndex]}
           onNextSnippet={handleNextSnippet}
-        ></PracticeA>
+        ></AuditoryRecognition>
       )}
     </>
   );
