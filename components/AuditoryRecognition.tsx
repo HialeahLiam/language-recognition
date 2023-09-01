@@ -57,6 +57,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
       setGuessCorrect(true);
     else setGuessCorrect(false);
     setGuessRevealed(true);
+    window.scrollTo({ top: 0 });
   }
 
   function handlePlay() {
@@ -92,7 +93,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
 
   return (
     <div className="mx-auto sm:px-6 lg:px-8 flex flex-col items-center ">
-      <div className="relative mb-20 lg:h-72 aspect-video ">
+      <div className="relative mb-20 w-full lg:w-auto lg:h-72 aspect-video ">
         <video
           onEnded={handleVideoEnd}
           onPlay={handlePlay}
@@ -149,28 +150,8 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
           );
         })}
       </div>
-      <div className="flex items-center">
-        <input
-          name="guess"
-          id="guess"
-          className=" mr-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-          style={{
-            "-webkit-appearance": "none",
-          }}
-          onChange={(e) => setGuess(e.target.value)}
-          value={guess}
-          autoComplete="off"
-        />
 
-        <Button
-          onClick={handleCheckGuess}
-          className="rounded-full h-12 aspect-square border-2"
-          variant={"outline"}
-        >
-          <CheckIcon></CheckIcon>
-        </Button>
-      </div>
-      {guessRevealed && (
+      {guessRevealed ? (
         // <Button
         //   onClick={handleContinue}
         //   className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
@@ -180,6 +161,29 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
         <Button onClick={handleContinue} className="">
           Continue
         </Button>
+      ) : (
+        <div className="flex items-center">
+          <input
+            name="guess"
+            id="guess"
+            className=" mr-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            style={{
+              // @ts-expect-error
+              "-webkit-appearance": "none",
+            }}
+            onChange={(e) => setGuess(e.target.value)}
+            value={guess}
+            autoComplete="off"
+          />
+
+          <Button
+            onClick={handleCheckGuess}
+            className="rounded-full h-12 aspect-square border-2"
+            variant={"outline"}
+          >
+            <CheckIcon></CheckIcon>
+          </Button>
+        </div>
       )}
     </div>
   );
