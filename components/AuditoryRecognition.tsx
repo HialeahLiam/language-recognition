@@ -4,6 +4,7 @@ import { PlayIcon } from "@heroicons/react/20/solid";
 import { Button } from "./ui/button";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
+import defaultTheme from "tailwindcss/defaultTheme";
 
 interface Props {
   snippet: {
@@ -20,6 +21,8 @@ interface Props {
   onNextSnippet: () => void;
 }
 
+const dialogueTransitionTopPadding = 30; // px
+
 function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
   const [currentWord, setCurrentWord] = useState("");
   const [guessRevealed, setGuessRevealed] = useState(false);
@@ -34,12 +37,25 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
   const video = useRef(null);
   const progressIntervalRef = useRef<NodeJS.Timer>();
   const dialogueRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const testedTextRef = useRef<HTMLSpanElement>(null);
+  const dialogueTranslationDistanceRef = useRef<number | null>(null);
 
-  const dialoguePosition = dialogueRef.current?.getBoundingClientRect();
+  const testedTextWidth = inputRef.current?.getBoundingClientRect().width;
+
+  useEffect(() => {
+    console.log(`my ref: ${dialogueRef}`);
+    const dialoguePosition = dialogueRef.current!.getBoundingClientRect();
+    dialogueTranslationDistanceRef.current = dialoguePosition.top - 30;
+  }, []);
 
   const testedWord = snippet.words.find(
     (w) => w.id === snippet.testedWordId
   )?.text;
+
+  const isScreenLG = window.matchMedia(
+    `(min-width: ${defaultTheme.screens.lg})`
+  ).matches;
 
   function updateCurrentWord(currentTime: number) {
     const match = snippet.words.find(
@@ -60,7 +76,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
       setGuessCorrect(true);
     else setGuessCorrect(false);
     setGuessRevealed(true);
-    window.scrollTo({ top: 0 });
+    // window.scrollTo({ top: 0 });
   }
 
   function handlePlay() {
@@ -94,12 +110,13 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
     onNextSnippet();
   }
 
+  console.log({ snippetPlaying, guessRevealed, isScreenLG });
   return (
     <div className="mx-auto sm:px-6 lg:px-8 flex flex-col items-center ">
       <div
         className={cn(
-          "relative mb-20 w-full lg:w-auto lg:h-72 aspect-video ",
-          !snippetPlaying && "opacity-0"
+          "relative mb-20 w-full lg:w-auto lg:h-72 aspect-video",
+          !snippetPlaying ? "visible" : "invisible lg:visible"
         )}
       >
         <video
@@ -114,8 +131,8 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
         ></video>
         <div
           className={cn(
-            "absolute inset-0 z-10 bg-black/50 backdrop-blur-sm flex  items-center justify-center cursor-pointer ",
-            (!videoLoaded || snippetPlaying) && "hidden"
+            "absolute invisible lg:inset-0 z-10 bg-black/50 backdrop-blur-sm flex  items-center justify-center cursor-pointer ",
+            videoLoaded && !snippetPlaying && "lg:visible"
           )}
           onClick={handlePlay}
         >
@@ -126,43 +143,60 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
       </div>
       {guessCorrect !== null && guessCorrect && <p>Correct!</p>}
       {guessCorrect !== null && !guessCorrect && <p>Incorrect</p>}
+
       <div
-        className="flex flex-wrap lg:mb-32 mb-12 text-3xl z-10 transition"
+        className="flex flex-wrap lg:mb-32 mb-12 text-3xl z-10 transition items-center"
         ref={dialogueRef}
         style={{
-          transform: `${snippetPlaying ? "" : "translatey(-50px)"}`,
+          transform: `${
+            !snippetPlaying && !guessRevealed && !isScreenLG
+              ? `translatey(-${dialogueTranslationDistanceRef.current}px)`
+              : ""
+          }`,
         }}
       >
-        {snippet.words.map((w) => {
-          const key = w.id;
-          return (
-            <span
-              className={`
-              ${key === currentWord ? "border-b border-red-400" : ""} 
-              ${
-                key === currentWord && w.id !== snippet.testedWordId
-                  ? "text-red-500"
-                  : ""
-              } 
-              ${w.id === snippet.testedWordId ? " mx-2" : ""}
-              ${
-                w.id === snippet.testedWordId && !guessRevealed
-                  ? "text-red-400/0 bg-gray-200 rounded"
-                  : ""
-              }
-              ${
-                w.id === snippet.testedWordId && guessRevealed
-                  ? `${guessCorrect ? "text-green-400" : "text-red-400"}`
-                  : ""
-              }
-              mr-1
-              `}
-              key={key}
-            >
-              {w.text}
-            </span>
-          );
-        })}
+        <span className=" hidden" ref={testedTextRef}>
+          {snippet.words.find((w) => w.id === snippet.testedWordId)?.text}
+        </span>
+        {testedTextRef.current &&
+          snippet.words.map((w) => {
+            const key = w.id;
+            return w.id === snippet.testedWordId ? (
+              <input
+                className={cn(
+                  "mr-2 px-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:leading-6",
+                  w.id === snippet.testedWordId ? " mx-2" : "",
+
+                  w.id === snippet.testedWordId && guessRevealed
+                    ? `${guessCorrect ? "text-green-400" : "text-red-400"}`
+                    : ""
+                )}
+                onChange={(e) => setGuess(e.target.value)}
+                disabled={snippetPlaying}
+                value={guess}
+                autoComplete="off"
+                ref={inputRef}
+                key={key}
+                onFocus={() => console.log("focus!")}
+                style={{
+                  width: `${testedTextWidth}px`,
+                  WebkitAppearance: "none",
+                }}
+              ></input>
+            ) : (
+              <span
+                className={`
+                  ${key === currentWord ? "border-b border-red-400" : ""} 
+                  ${key === currentWord ? "text-red-500" : ""} 
+                 
+                  mr-1
+                  `}
+                key={key}
+              >
+                {w.text}
+              </span>
+            );
+          })}
       </div>
 
       {guessRevealed ? (
@@ -186,8 +220,10 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
               "-webkit-appearance": "none",
             }}
             onChange={(e) => setGuess(e.target.value)}
+            disabled={snippetPlaying}
             value={guess}
             autoComplete="off"
+            ref={inputRef}
           />
 
           <Button
