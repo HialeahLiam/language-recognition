@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import PracticeA from "../components/PracticeA";
-import PracticeB from "../components/PracticeB";
+import PracticeA from "../../components/PracticeA";
+import { Button } from "@/components/ui/button";
 
 const snippets = [
   {
@@ -145,14 +145,17 @@ const snippets = [
 
 function PracticePage() {
   const [clipIndex, setClipIndex] = useState(0);
+  const [show, setShow] = useState(false);
 
   function handleNextSnippet() {
     setClipIndex((ci) => ci + 1);
   }
   return (
     <>
-      {clipIndex >= snippets.length ? (
-        <PracticeB></PracticeB>
+      {!show ? (
+        <div className="h-screen flex justify-center items-center">
+          <Button onClick={() => setShow(true)}>Start practice</Button>
+        </div>
       ) : (
         <PracticeA
           snippet={snippets[clipIndex]}

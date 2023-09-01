@@ -86,6 +86,8 @@ function PracticeA({ snippet, onNextSnippet }: Props) {
       <video
         onEnded={handleVideoEnd}
         ref={video}
+        playsInline
+        autoPlay
         className="h-60 mb-20"
         src={snippet.videoSrc}
       ></video>
