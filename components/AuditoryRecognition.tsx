@@ -41,13 +41,19 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
   const testedTextRef = useRef<HTMLSpanElement>(null);
   const dialogueTranslationDistanceRef = useRef<number | null>(null);
 
-  const testedTextWidth = inputRef.current?.getBoundingClientRect().width;
+  const testedTextWidth = testedTextRef.current?.getBoundingClientRect().width;
 
   useEffect(() => {
     console.log(`my ref: ${dialogueRef}`);
     const dialoguePosition = dialogueRef.current!.getBoundingClientRect();
     dialogueTranslationDistanceRef.current = dialoguePosition.top - 30;
   }, []);
+
+  useEffect(() => {
+    // if (!snippetPlaying && videoLoaded) {
+    //   inputRef.current?.focus();
+    // }
+  }, [snippetPlaying]);
 
   const testedWord = snippet.words.find(
     (w) => w.id === snippet.testedWordId
@@ -155,7 +161,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
           }`,
         }}
       >
-        <span className=" hidden" ref={testedTextRef}>
+        <span className="invisible absolute" ref={testedTextRef}>
           {snippet.words.find((w) => w.id === snippet.testedWordId)?.text}
         </span>
         {testedTextRef.current &&
@@ -164,7 +170,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
             return w.id === snippet.testedWordId ? (
               <input
                 className={cn(
-                  "mr-2 px-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:leading-6",
+                  "mr-2 pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:leading-6",
                   w.id === snippet.testedWordId ? " mx-2" : "",
 
                   w.id === snippet.testedWordId && guessRevealed
@@ -179,7 +185,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
                 key={key}
                 onFocus={() => console.log("focus!")}
                 style={{
-                  width: `${testedTextWidth}px`,
+                  width: `calc(${testedTextWidth}px + 2rem)`,
                   WebkitAppearance: "none",
                 }}
               ></input>
@@ -211,21 +217,6 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
         </Button>
       ) : (
         <div className="flex items-center">
-          <input
-            name="guess"
-            id="guess"
-            className=" mr-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-            style={{
-              // @ts-expect-error
-              "-webkit-appearance": "none",
-            }}
-            onChange={(e) => setGuess(e.target.value)}
-            disabled={snippetPlaying}
-            value={guess}
-            autoComplete="off"
-            ref={inputRef}
-          />
-
           <Button
             onClick={handleCheckGuess}
             className="rounded-full h-12 aspect-square border-2"
