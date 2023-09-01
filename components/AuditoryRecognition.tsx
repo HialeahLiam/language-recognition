@@ -33,6 +33,9 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
   const [guessCorrect, setGuessCorrect] = useState<boolean | null>(null);
   const video = useRef(null);
   const progressIntervalRef = useRef<NodeJS.Timer>();
+  const dialogueRef = useRef<HTMLDivElement>(null);
+
+  const dialoguePosition = dialogueRef.current?.getBoundingClientRect();
 
   const testedWord = snippet.words.find(
     (w) => w.id === snippet.testedWordId
@@ -93,7 +96,12 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
 
   return (
     <div className="mx-auto sm:px-6 lg:px-8 flex flex-col items-center ">
-      <div className="relative mb-20 w-full lg:w-auto lg:h-72 aspect-video ">
+      <div
+        className={cn(
+          "relative mb-20 w-full lg:w-auto lg:h-72 aspect-video ",
+          !snippetPlaying && "opacity-0"
+        )}
+      >
         <video
           onEnded={handleVideoEnd}
           onPlay={handlePlay}
@@ -106,7 +114,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
         ></video>
         <div
           className={cn(
-            "absolute inset-0 z-10 bg-black/50 backdrop-blur-sm flex  items-center justify-center cursor-pointer",
+            "absolute inset-0 z-10 bg-black/50 backdrop-blur-sm flex  items-center justify-center cursor-pointer ",
             (!videoLoaded || snippetPlaying) && "hidden"
           )}
           onClick={handlePlay}
@@ -118,7 +126,13 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
       </div>
       {guessCorrect !== null && guessCorrect && <p>Correct!</p>}
       {guessCorrect !== null && !guessCorrect && <p>Incorrect</p>}
-      <div className="flex flex-wrap lg:mb-32 mb-20">
+      <div
+        className="flex flex-wrap lg:mb-32 mb-12 text-3xl z-10 transition"
+        ref={dialogueRef}
+        style={{
+          transform: `${snippetPlaying ? "" : "translatey(-50px)"}`,
+        }}
+      >
         {snippet.words.map((w) => {
           const key = w.id;
           return (
@@ -182,6 +196,13 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
             variant={"outline"}
           >
             <CheckIcon></CheckIcon>
+          </Button>
+          <Button
+            onClick={handlePlay}
+            className="rounded-full h-12 aspect-square border-2"
+            variant={"outline"}
+          >
+            Replay
           </Button>
         </div>
       )}
