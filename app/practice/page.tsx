@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import PracticeA from "../../components/PracticeA";
 import { Button } from "@/components/ui/button";
+import { isDev } from "@/lib/utils";
 
 const snippets = [
   {
