@@ -50,9 +50,9 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
   }, []);
 
   useEffect(() => {
-    // if (!snippetPlaying && videoLoaded) {
-    //   inputRef.current?.focus();
-    // }
+    if (!snippetPlaying && videoLoaded) {
+      inputRef.current?.focus();
+    }
   }, [snippetPlaying]);
 
   const testedWord = snippet.words.find(
@@ -122,7 +122,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
       <div
         className={cn(
           "relative mb-20 w-full lg:w-auto lg:h-72 aspect-video",
-          !snippetPlaying ? "visible" : "invisible lg:visible"
+          !snippetPlaying ? "invisible lg:visible" : "visible "
         )}
       >
         <video
