@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { PlayIcon } from "@heroicons/react/20/solid";
 import { Button } from "./ui/button";
 import { CheckIcon } from "@radix-ui/react-icons";
@@ -43,6 +43,11 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
 
   const testedTextWidth = testedTextRef.current?.getBoundingClientRect().width;
 
+  const testedWord = useMemo(
+    () => snippet.words.find((w) => w.id === snippet.testedWordId)?.text,
+    [snippet]
+  );
+
   useEffect(() => {
     console.log(`my ref: ${dialogueRef}`);
     const dialoguePosition = dialogueRef.current!.getBoundingClientRect();
@@ -54,10 +59,6 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
       inputRef.current?.focus();
     }
   }, [snippetPlaying]);
-
-  const testedWord = snippet.words.find(
-    (w) => w.id === snippet.testedWordId
-  )?.text;
 
   const isScreenLG = window.matchMedia(
     `(min-width: ${defaultTheme.screens.lg})`
@@ -82,7 +83,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
       setGuessCorrect(true);
     else setGuessCorrect(false);
     setGuessRevealed(true);
-    // window.scrollTo({ top: 0 });
+    inputRef.current!.disabled = true;
   }
 
   function handlePlay() {
@@ -118,7 +119,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
 
   console.log({ snippetPlaying, guessRevealed, isScreenLG });
   return (
-    <div className="mx-auto sm:px-6 lg:px-8 flex flex-col items-center ">
+    <div className="  lg:px-8 flex flex-col items-center ">
       <div
         className={cn(
           "relative mb-20 w-full lg:w-auto lg:h-72 aspect-video",
@@ -151,7 +152,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
       {guessCorrect !== null && !guessCorrect && <p>Incorrect</p>}
 
       <div
-        className="flex flex-wrap lg:mb-32 mb-12 text-3xl z-10 transition items-center"
+        className="flex flex-wrap lg:mb-32 mb-12 text-2xl lg:text-3xl z-10 transition justify-center items-center gap-2 text-gray-600"
         ref={dialogueRef}
         style={{
           transform: `${
@@ -162,7 +163,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
         }}
       >
         <span className="invisible absolute" ref={testedTextRef}>
-          {snippet.words.find((w) => w.id === snippet.testedWordId)?.text}
+          {testedWord}
         </span>
         {testedTextRef.current &&
           snippet.words.map((w) => {
@@ -170,32 +171,52 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
             return w.id === snippet.testedWordId ? (
               <input
                 className={cn(
-                  "mr-2 pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:leading-6",
+                  "min-w-fit pl-2 rounded-md border-0 py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:leading-6 transition",
+                  guessRevealed
+                    ? "bg-white"
+                    : "shadow-sm ring-1 ring-inset ring-gray-300",
+                  snippetPlaying && "placeholder:invisible",
                   w.id === snippet.testedWordId ? " mx-2" : "",
 
                   w.id === snippet.testedWordId && guessRevealed
-                    ? `${guessCorrect ? "text-green-400" : "text-red-400"}`
-                    : ""
+                    ? `${
+                        guessCorrect
+                          ? "text-green-400 opacity-100"
+                          : "text-red-400"
+                      }`
+                    : "",
+                  key === currentWord && "scale-110  ring-gray-900"
                 )}
+                onSubmit={() => console.log("submit")}
+                onKeyDownCapture={(e) =>
+                  e.key === "Enter" && handleCheckGuess()
+                }
                 onChange={(e) => setGuess(e.target.value)}
                 disabled={snippetPlaying}
-                value={guess}
+                value={guessRevealed ? testedWord : guess}
+                placeholder="?"
                 autoComplete="off"
                 ref={inputRef}
                 key={key}
                 onFocus={() => console.log("focus!")}
+                size={guessRevealed ? 1 : guess.length || testedWord?.length}
                 style={{
-                  width: `calc(${testedTextWidth}px + 2rem)`,
+                  width: !guessRevealed
+                    ? ""
+                    : `calc(${testedTextWidth}px + 1rem)`,
                   WebkitAppearance: "none",
                 }}
               ></input>
             ) : (
               <span
                 className={`
-                  ${key === currentWord ? "border-b border-red-400" : ""} 
-                  ${key === currentWord ? "text-red-500" : ""} 
+                  ${
+                    key === currentWord
+                      ? "border-b border-gray-400 text-gray-900 scale-105"
+                      : ""
+                  } 
                  
-                  mr-1
+                  transition
                   `}
                 key={key}
               >
@@ -215,8 +236,15 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
         <Button onClick={handleContinue} className="">
           Continue
         </Button>
-      ) : (
-        <div className="flex items-center">
+      ) : !snippetPlaying && videoLoaded ? (
+        <div className="flex items-center gap-10">
+          <Button
+            onClick={handlePlay}
+            className="rounded-full h-12  border-2"
+            variant={"outline"}
+          >
+            Replay
+          </Button>
           <Button
             onClick={handleCheckGuess}
             className="rounded-full h-12 aspect-square border-2"
@@ -224,15 +252,8 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
           >
             <CheckIcon></CheckIcon>
           </Button>
-          <Button
-            onClick={handlePlay}
-            className="rounded-full h-12 aspect-square border-2"
-            variant={"outline"}
-          >
-            Replay
-          </Button>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
