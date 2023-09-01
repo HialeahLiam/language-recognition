@@ -82,7 +82,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
   }
 
   return (
-    <div className="container mx-auto sm:px-6 lg:px-8 flex flex-col items-center">
+    <div className="mx-auto sm:px-6 lg:px-8 flex flex-col items-center ">
       <video
         onEnded={handleVideoEnd}
         onPlay={handlePlay}
@@ -94,7 +94,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
       ></video>
       {guessCorrect !== null && guessCorrect && <p>Correct!</p>}
       {guessCorrect !== null && !guessCorrect && <p>Incorrect</p>}
-      <p className="mb-2">
+      <div className="mb-2 flex flex-wrap">
         {snippet.words.map((w) => {
           const key = w.id;
           return (
@@ -125,7 +125,7 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
             </span>
           );
         })}
-      </p>
+      </div>
 
       <div>
         <input

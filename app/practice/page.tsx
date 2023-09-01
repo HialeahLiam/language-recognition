@@ -157,10 +157,12 @@ function PracticePage() {
           <Button onClick={() => setShow(true)}>Start practice</Button>
         </div>
       ) : (
-        <AuditoryRecognition
-          snippet={snippets[clipIndex]}
-          onNextSnippet={handleNextSnippet}
-        ></AuditoryRecognition>
+        <div className="mx-auto ">
+          <AuditoryRecognition
+            snippet={snippets[clipIndex]}
+            onNextSnippet={handleNextSnippet}
+          ></AuditoryRecognition>
+        </div>
       )}
     </>
   );
