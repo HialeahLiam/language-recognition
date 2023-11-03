@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import PracticeA from "../components/PracticeA";
-import PracticeB from "../components/PracticeB";
+import { Button } from "@/components/ui/button";
+import AuditoryRecognition from "@/components/AuditoryRecognition";
 
 const snippets = [
   {
@@ -145,21 +145,26 @@ const snippets = [
 
 function PracticePage() {
   const [clipIndex, setClipIndex] = useState(0);
+  const [show, setShow] = useState(false);
 
   function handleNextSnippet() {
     setClipIndex((ci) => ci + 1);
   }
   return (
-    <>
-      {clipIndex >= snippets.length ? (
-        <PracticeB></PracticeB>
+    <div className="container">
+      {!show ? (
+        <div className="h-screen flex justify-center items-center">
+          <Button onClick={() => setShow(true)}>Start practice</Button>
+        </div>
       ) : (
-        <PracticeA
-          snippet={snippets[clipIndex]}
-          onNextSnippet={handleNextSnippet}
-        ></PracticeA>
+        <div className="mx-auto h-full ">
+          <AuditoryRecognition
+            snippet={snippets[clipIndex]}
+            onNextSnippet={handleNextSnippet}
+          ></AuditoryRecognition>
+        </div>
       )}
-    </>
+    </div>
   );
 }
 
