@@ -119,11 +119,11 @@ function AuditoryRecognition({ snippet, onNextSnippet }: Props) {
 
   console.log({ snippetPlaying, guessRevealed, isScreenLG });
   return (
-    <div className="  lg:px-8 flex flex-col items-center ">
+    <div className="  lg:px-8 flex flex-col items-center py-2 ">
       <div
         className={cn(
           "relative mb-20 w-full lg:w-auto lg:h-72 aspect-video",
-          !snippetPlaying ? "invisible lg:visible" : "visible "
+          !snippetPlaying && "hidden lg:block"
         )}
       >
         <video
