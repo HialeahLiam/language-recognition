@@ -92,7 +92,7 @@ export function ChatMessage({
             // },
           }}
         >
-          {blankedMessage}
+          {isTestedBlank ? blankedMessage : message.content}
         </MemoizedReactMarkdown>
         {/* <ChatMessageActions message={message} /> */}
       </div>
