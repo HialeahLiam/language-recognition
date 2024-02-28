@@ -22,6 +22,7 @@ import { Input } from "./ui/input";
 import { toast } from "react-hot-toast";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useRef } from "react";
 
 const IS_PREVIEW = process.env.VERCEL_ENV === "preview";
 
@@ -61,13 +62,16 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
       // },
     });
 
+  const audioRef = useRef<HTMLAudioElement>(null);
+
   useEffect(() => {
     const fetchAudio = async () => {
       const response = await fetch("/api/speech", {
         method: "POST",
         body: JSON.stringify(
           {
-            input: "My name is Liam, what about yours?",
+            input:
+              "My name is Liam, what about yours? I want to smoke cigarrettes and drink coffee. My name is Liam, what about yours? I want to smoke cigarrettes and drink coffee",
           },
           null,
           4
@@ -75,6 +79,13 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
       });
       const body = response.body;
       console.log({ body });
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      console.log({ blobUrl });
+
+      if (audioRef.current?.canPlayType("audio/mpeg")) {
+        audioRef.current?.setAttribute("src", blobUrl);
+      }
     };
     fetchAudio();
   }, []);
@@ -82,6 +93,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
   console.log({ messages });
   return (
     <>
+      <audio ref={audioRef} autoPlay={false}></audio>
       <div className={cn("pb-[200px] pt-4 md:pt-10", className)}>
         {messages.length ? (
           <>
@@ -92,6 +104,13 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
           <EmptyScreen setInput={setInput} />
         )}
       </div>
+      <button
+        className="cursor-pointer"
+        type="button"
+        onClick={() => audioRef.current?.play()}
+      >
+        Play
+      </button>
       <ChatPanel
         id={id}
         isLoading={isLoading}
