@@ -21,6 +21,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { toast } from "react-hot-toast";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const IS_PREVIEW = process.env.VERCEL_ENV === "preview";
 
@@ -53,12 +54,32 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
           toast.error(response.statusText);
         }
       },
-      onFinish() {
-        if (!path.includes("chat")) {
-          window.history.pushState({}, "", `/chat/${id}`);
-        }
-      },
+      // onFinish() {
+      //   if (!path.includes("chat")) {
+      //     window.history.pushState({}, "", `/chat/${id}`);
+      //   }
+      // },
     });
+
+  useEffect(() => {
+    const fetchAudio = async () => {
+      const response = await fetch("/api/speech", {
+        method: "POST",
+        body: JSON.stringify(
+          {
+            input: "My name is Liam, what about yours?",
+          },
+          null,
+          4
+        ),
+      });
+      const body = response.body;
+      console.log({ body });
+    };
+    fetchAudio();
+  }, []);
+
+  console.log({ messages });
   return (
     <>
       <div className={cn("pb-[200px] pt-4 md:pt-10", className)}>
