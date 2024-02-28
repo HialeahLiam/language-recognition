@@ -5,14 +5,13 @@ import { ChatMessage } from "@/components/chat-message";
 
 export interface ChatList {
   messages: Message[];
+  isTestedBlank?: boolean;
 }
 
-export function ChatList({ messages }: ChatList) {
+export function ChatList({ messages, isTestedBlank = true }: ChatList) {
   if (!messages.length) {
     return null;
   }
-
-  console.log({ messages });
 
   return (
     <div className="relative mx-auto max-w-2xl px-4">

@@ -10,12 +10,33 @@ import { cn } from "@/lib/utils";
 import { MemoizedReactMarkdown } from "@/components/markdown";
 import { IconOpenAI, IconUser } from "@/components/ui/icons";
 import { ChatMessageActions } from "@/components/chat-message-actions";
+import { useMemo } from "react";
 
 export interface ChatMessageProps {
   message: Message;
+  isTestedBlank?: boolean;
 }
 
-export function ChatMessage({ message, ...props }: ChatMessageProps) {
+export function ChatMessage({
+  message,
+  isTestedBlank = true,
+  ...props
+}: ChatMessageProps) {
+  function replaceRandomWordWithUnderscore(inputString: string) {
+    const words = inputString.split(" ");
+
+    if (words.length === 0) return inputString;
+
+    let randomIndex = Math.floor(Math.random() * words.length);
+
+    words[randomIndex] = "___";
+
+    return words.join(" ");
+  }
+  const blankedMessage = useMemo(
+    () => replaceRandomWordWithUnderscore(message.content),
+    [message, isTestedBlank]
+  );
   return (
     <div
       className={cn("group relative mb-4 flex items-start md:-ml-12")}
@@ -71,7 +92,7 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
             // },
           }}
         >
-          {message.content}
+          {blankedMessage}
         </MemoizedReactMarkdown>
         {/* <ChatMessageActions message={message} /> */}
       </div>
