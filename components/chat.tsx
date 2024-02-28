@@ -99,13 +99,6 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
           <EmptyScreen setInput={setInput} />
         )}
       </div>
-      <button
-        className="cursor-pointer"
-        type="button"
-        onClick={() => audioRef.current?.play()}
-      >
-        Play
-      </button>
       <ChatPanel
         id={id}
         isLoading={isLoading}
