@@ -15,6 +15,6 @@ export async function POST(req: Request) {
     model: "tts-1",
     voice: "alloy",
     response_format: "mp3",
-    speed: 1.0,
+    // speed: 1.1,
   });
 }

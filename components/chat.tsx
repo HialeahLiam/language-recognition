@@ -23,6 +23,7 @@ import { toast } from "react-hot-toast";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useRef } from "react";
+import { nanoid } from "ai";
 
 const IS_PREVIEW = process.env.VERCEL_ENV === "preview";
 
@@ -34,6 +35,7 @@ export interface ChatProps extends React.ComponentProps<"div"> {
 export function Chat({ id, initialMessages, className }: ChatProps) {
   const router = useRouter();
   const path = usePathname();
+  const [chatStarted, setChatStarted] = useState(false);
   //   const [previewToken, setPreviewToken] = useLocalStorage<string | null>(
   //     "ai-token",
   //     null
@@ -52,7 +54,19 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
     setInput,
     handleSubmit,
   } = useChat({
-    initialMessages,
+    initialMessages: [
+      {
+        id: nanoid(),
+        role: "system",
+        content:
+          "Pretend you are having a conversation. Every reply should be 2 sentences max. Each of your responses should represent one person. When I say 'reply', switch to the other person. The conversation is never-ending. The participants are close friends. Don't try to be polite. Be creative and genuine with your responses. If a topic drags on, switch topics. Always try to ask the opinion of the other person. Kick off the conversation",
+      },
+      {
+        id: nanoid(),
+        role: "user",
+        content: "Begin the conversation",
+      },
+    ],
     id,
     //   body: {
     //     id,
@@ -90,13 +104,19 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
     <>
       <audio ref={audioRef} autoPlay={false}></audio>
       <div className={cn("pb-[200px] pt-4 md:pt-10", className)}>
-        {messages.length ? (
+        {chatStarted ? (
           <>
             <ChatList messages={messages} />
             <ChatScrollAnchor trackVisibility={isLoading} />
           </>
         ) : (
-          <EmptyScreen setInput={setInput} />
+          <EmptyScreen
+            begin={() => {
+              setChatStarted(true);
+              reload();
+            }}
+            setInput={setInput}
+          />
         )}
       </div>
       <ChatPanel
