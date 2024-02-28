@@ -42,55 +42,50 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
   //   const [previewTokenInput, setPreviewTokenInput] = useState(
   //     previewToken ?? ""
   //   );
-  const { messages, append, reload, stop, isLoading, input, setInput } =
-    useChat({
-      initialMessages,
-      id,
-      //   body: {
-      //     id,
-      //     previewToken,
-      //   },
-      onResponse(response) {
-        if (response.status === 401) {
-          toast.error(response.statusText);
-        }
-      },
-      // onFinish() {
-      //   if (!path.includes("chat")) {
-      //     window.history.pushState({}, "", `/chat/${id}`);
-      //   }
-      // },
-    });
-
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  useEffect(() => {
-    const fetchAudio = async () => {
+  const {
+    messages,
+    append,
+    reload,
+    stop,
+    isLoading,
+    input,
+    setInput,
+    handleSubmit,
+  } = useChat({
+    initialMessages,
+    id,
+    //   body: {
+    //     id,
+    //     previewToken,
+    //   },
+    onResponse(response) {
+      if (response.status === 401) {
+        toast.error(response.statusText);
+      }
+    },
+    async onFinish(message) {
       const response = await fetch("/api/speech", {
         method: "POST",
         body: JSON.stringify(
           {
-            input:
-              "My name is Liam, what about yours? I want to smoke cigarrettes and drink coffee. My name is Liam, what about yours? I want to smoke cigarrettes and drink coffee",
+            input: message.content,
           },
           null,
           4
         ),
       });
       const body = response.body;
-      console.log({ body });
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
-      console.log({ blobUrl });
 
       if (audioRef.current?.canPlayType("audio/mpeg")) {
         audioRef.current?.setAttribute("src", blobUrl);
       }
-    };
-    fetchAudio();
-  }, []);
+      audioRef.current?.play();
+    },
+  });
 
-  console.log({ messages });
+  const audioRef = useRef<HTMLAudioElement>(null);
   return (
     <>
       <audio ref={audioRef} autoPlay={false}></audio>
