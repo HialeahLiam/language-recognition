@@ -23,8 +23,9 @@ import { toast } from "react-hot-toast";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useRef } from "react";
-import { nanoid } from "ai";
+import { AIStream, nanoid } from "ai";
 import { useSpeechPlayback } from "../lib/hooks/use-speech-playback";
+import { useMemo } from "react";
 
 const IS_PREVIEW = process.env.VERCEL_ENV === "preview";
 
@@ -88,6 +89,41 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
       play(message.content);
     },
   });
+
+  function replaceRandomWordWithUnderscore(inputString: string) {
+    const words = inputString.split(" ");
+
+    if (words.length === 0)
+      return { blanked: inputString, blankedWord: inputString };
+
+    let randomIndex = Math.floor(Math.random() * words.length);
+    const blankedWord = words[randomIndex];
+
+    words[randomIndex] = "___";
+
+    return { blanked: words.join(" "), blankedWord };
+  }
+
+  const chatMessages = useMemo(() => {
+    const assistantMessages = messages.filter((m) => m.role === "assistant");
+    const lastMessage = assistantMessages[assistantMessages.length - 1];
+
+    const lastAnswer = answers[answers.length - 1];
+    const lastMessageHasBeenAnswered = lastMessage.id === lastAnswer.messageId;
+
+    const messageStrings = assistantMessages.map((m) => m.content);
+
+    console.log({ assistantMessages, lastMessage });
+    if (!lastMessage || lastMessageHasBeenAnswered) {
+      return messageStrings;
+    }
+    const { blanked, blankedWord } = replaceRandomWordWithUnderscore(
+      lastMessage?.content
+    );
+
+    return [...messageStrings.slice(0, messageStrings.length - 1), blanked];
+  }, [messages]);
+
   const handleGuessSubmit = async (guess: string) => {
     setAnswers((prev) => [
       ...prev,
@@ -110,7 +146,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
       <div className={cn("pb-[200px] pt-4 md:pt-10", className)}>
         {chatStarted ? (
           <>
-            <ChatList messages={messages} />
+            <ChatList messages={chatMessages} />
             <ChatScrollAnchor trackVisibility={isLoading} />
           </>
         ) : (
