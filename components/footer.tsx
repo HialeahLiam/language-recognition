@@ -11,7 +11,7 @@ export function FooterText({ className, ...props }: React.ComponentProps<"p">) {
       )}
       {...props}
     >
-      Don't ever forget, you're awesome. .
+      Don't ever forget, you're awesome.
     </p>
   );
 }
