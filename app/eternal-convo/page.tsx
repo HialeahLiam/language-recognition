@@ -1,10 +1,16 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import { Chat } from "../../components/chat";
+import { EmptyScreen } from "../../components/empty-screen";
 
 function EternalConvoPage() {
-  //   const id = nanoid();
+  const [lang, setLang] = useState<"english" | "german">();
 
-  return <Chat />;
+  if (lang) {
+    return <Chat lang={lang} />;
+  } else {
+    return <EmptyScreen begin={setLang}></EmptyScreen>;
+  }
 }
 
 export default EternalConvoPage;

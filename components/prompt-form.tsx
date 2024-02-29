@@ -16,6 +16,7 @@ export interface PromptProps
   extends Pick<UseChatHelpers, "input" | "setInput"> {
   onSubmit: (value: string) => void;
   isLoading: boolean;
+  disabled?: boolean;
 }
 
 export function PromptForm({
@@ -23,6 +24,7 @@ export function PromptForm({
   input,
   setInput,
   isLoading,
+  disabled = false,
 }: PromptProps) {
   const { formRef, onKeyDown } = useEnterSubmit();
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
@@ -47,6 +49,7 @@ export function PromptForm({
     >
       <div className="relative flex flex-col w-full px-8 overflow-hidden max-h-60 grow bg-background sm:rounded-md sm:border sm:px-12">
         <Textarea
+          disabled={disabled}
           ref={inputRef}
           tabIndex={0}
           onKeyDown={onKeyDown}

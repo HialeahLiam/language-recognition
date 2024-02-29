@@ -15,6 +15,7 @@ export interface ChatPanelProps
   id?: string;
   title?: string;
   submit: (input: string) => void;
+  promptDisabled?: boolean;
 }
 
 export function ChatPanel({
@@ -27,6 +28,7 @@ export function ChatPanel({
   input,
   setInput,
   messages,
+  promptDisabled = false,
 }: ChatPanelProps) {
   const [shareDialogOpen, setShareDialogOpen] = React.useState(false);
 
@@ -61,6 +63,7 @@ export function ChatPanel({
             input={input}
             setInput={setInput}
             isLoading={isLoading}
+            disabled={promptDisabled}
           />
           <FooterText className="hidden sm:block" />
         </div>

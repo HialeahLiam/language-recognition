@@ -32,6 +32,7 @@ const IS_PREVIEW = process.env.VERCEL_ENV === "preview";
 export interface ChatProps extends React.ComponentProps<"div"> {
   initialMessages?: Message[];
   id?: string;
+  lang: "english" | "german";
 }
 
 enum SystemMessage {
@@ -43,6 +44,10 @@ enum FirstMessage {
   English = "Begin the conversation",
   German = "Beginne das Gespräch",
 }
+enum ContinueKeyword {
+  English = "reply",
+  German = "Antwort",
+}
 
 export interface Answer {
   text: string;
@@ -51,13 +56,36 @@ export interface Answer {
   correctAnswer: string;
 }
 
-export function Chat({ id, initialMessages, className }: ChatProps) {
+export function Chat({ id, initialMessages, className, lang }: ChatProps) {
   const router = useRouter();
   const path = usePathname();
   const [answers, setAnswers] = useState<Answer[]>([]);
   const { play, replay } = useSpeechPlayback();
   const [chatStarted, setChatStarted] = useState(false);
   const correctAnswerRef = useRef("");
+  const PromptConfig = useMemo(() => {
+    switch (lang) {
+      case "english":
+        return {
+          systemMessage: SystemMessage.English,
+          firstMessage: FirstMessage.English,
+          continueKeyword: ContinueKeyword.English,
+        };
+      case "german":
+        return {
+          systemMessage: SystemMessage.German,
+          firstMessage: FirstMessage.German,
+          continueKeyword: ContinueKeyword.German,
+        };
+      default:
+        return {
+          systemMessage: SystemMessage.English,
+          firstMessage: FirstMessage.English,
+          continueKeyword: ContinueKeyword.English,
+        };
+    }
+  }, [lang]);
+
   const {
     messages,
     append,
@@ -72,12 +100,12 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
       {
         id: nanoid(),
         role: "system",
-        content: SystemMessage.German,
+        content: PromptConfig.systemMessage,
       },
       {
         id: nanoid(),
         role: "user",
-        content: FirstMessage.German,
+        content: PromptConfig.firstMessage,
       },
     ],
     id,
@@ -126,7 +154,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
       lastMessageCopy?.content
     );
 
-    correctAnswerRef.current = cleanTextSelection(blankedWord);
+    correctAnswerRef.current = blankedWord;
     lastMessageCopy.content = blanked;
 
     return [
@@ -139,14 +167,16 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
     setAnswers((prev) => [
       ...prev,
       {
-        isCorrect: guess === correctAnswerRef.current,
+        isCorrect:
+          guess === correctAnswerRef.current ||
+          guess === cleanTextSelection(correctAnswerRef.current),
         messageId: messages.findLast((m) => m.role === "assistant")!.id,
         text: guess,
         correctAnswer: correctAnswerRef.current,
       },
     ]);
     await append({
-      content: "Antwort", // we told gpt to expect "reply" to continue convo
+      content: PromptConfig.continueKeyword, // we told gpt to expect "reply" to continue convo
       role: "user",
     });
   };
@@ -156,25 +186,25 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
   return (
     <>
       <div className={cn("pb-[200px] pt-4 md:pt-10", className)}>
-        {chatStarted ? (
-          <>
-            <ChatList
-              messages={chatMessages}
-              answers={answers}
-              replaySpeech={replay}
-            />
-            <ChatScrollAnchor trackVisibility={isLoading} />
-          </>
-        ) : (
-          <EmptyScreen
-            begin={() => {
-              console.log("beginning");
-              setChatStarted(true);
-              reload();
-            }}
-            setInput={setInput}
-          />
+        {!chatStarted && (
+          <div className=" flex justify-center ">
+            <Button
+              onClick={() => {
+                setChatStarted(true);
+                reload();
+              }}
+              className=""
+            >
+              Begin
+            </Button>
+          </div>
         )}
+        <ChatList
+          messages={chatMessages}
+          answers={answers}
+          replaySpeech={replay}
+        />
+        <ChatScrollAnchor trackVisibility={isLoading} />
       </div>
       <ChatPanel
         id={id}
@@ -185,6 +215,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
         messages={messages}
         input={input}
         setInput={setInput}
+        promptDisabled={!chatStarted}
       />
     </>
   );
