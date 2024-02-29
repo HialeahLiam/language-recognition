@@ -65,7 +65,7 @@ export function ChatPanel({
             onSubmit={async (value) => {
               await append({
                 id,
-                content: value,
+                content: "reply", // we told gpt to expect "reply" to continue convo
                 role: "user",
               });
             }}
