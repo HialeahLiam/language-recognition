@@ -33,6 +33,7 @@ export async function POST(req: Request) {
       messages,
       temperature: 0.7,
       stream: true,
+      max_tokens: 1000,
     });
 
     const stream = OpenAIStream(res, {
