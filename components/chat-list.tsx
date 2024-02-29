@@ -10,9 +10,10 @@ export interface ChatList {
   // messages: string[];
   answers: Answer[];
   isTestedBlank?: boolean;
+  replaySpeech: () => void;
 }
 
-export function ChatList({ messages, answers }: ChatList) {
+export function ChatList({ messages, answers, replaySpeech }: ChatList) {
   if (!messages.length) {
     return null;
   }
@@ -20,6 +21,7 @@ export function ChatList({ messages, answers }: ChatList) {
   return (
     <div className="relative mx-auto max-w-2xl px-4">
       {messages.map((message, index) => {
+        const isLastMessage = index === messages.length - 1;
         const answer = answers.find((a) => a.messageId === message.id);
 
         return (
@@ -33,6 +35,7 @@ export function ChatList({ messages, answers }: ChatList) {
                     : "incorrect"
                   : "guessing"
               }
+              onReplay={isLastMessage ? replaySpeech : undefined}
             />
             {index < messages.length - 1 && (
               <Separator className="my-4 md:my-8" />

@@ -55,7 +55,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
   const router = useRouter();
   const path = usePathname();
   const [answers, setAnswers] = useState<Answer[]>([]);
-  const { play } = useSpeechPlayback();
+  const { play, replay } = useSpeechPlayback();
   const [chatStarted, setChatStarted] = useState(false);
   const correctAnswerRef = useRef("");
   const {
@@ -158,7 +158,11 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
       <div className={cn("pb-[200px] pt-4 md:pt-10", className)}>
         {chatStarted ? (
           <>
-            <ChatList messages={chatMessages} answers={answers} />
+            <ChatList
+              messages={chatMessages}
+              answers={answers}
+              replaySpeech={replay}
+            />
             <ChatScrollAnchor trackVisibility={isLoading} />
           </>
         ) : (

@@ -11,15 +11,21 @@ import { MemoizedReactMarkdown } from "@/components/markdown";
 import { IconOpenAI, IconUser } from "@/components/ui/icons";
 import { ChatMessageActions } from "@/components/chat-message-actions";
 import { useMemo } from "react";
-import { Check, X } from "@phosphor-icons/react";
+import { Check, SpeakerHigh, X } from "@phosphor-icons/react";
 
 export interface ChatMessageProps {
   // message: Message;
   message: string;
   state: "correct" | "incorrect" | "guessing";
+  onReplay?: () => void;
 }
 
-export function ChatMessage({ message, state, ...props }: ChatMessageProps) {
+export function ChatMessage({
+  message,
+  state,
+  onReplay,
+  ...props
+}: ChatMessageProps) {
   return (
     <div
       className={cn("group relative mb-4 flex items-start md:-ml-12 ")}
@@ -43,6 +49,11 @@ export function ChatMessage({ message, state, ...props }: ChatMessageProps) {
         </MemoizedReactMarkdown>
         {/* <ChatMessageActions message={message} /> */}
       </div>
+      {onReplay && (
+        <button onClick={onReplay} className="absolute -right-10">
+          <SpeakerHigh size={32} />
+        </button>
+      )}
     </div>
   );
 }

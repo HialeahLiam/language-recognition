@@ -1,8 +1,20 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useEffect } from "react";
 
 export const useSpeechPlayback = () => {
   const audioRef = useRef<HTMLAudioElement>(document.createElement("audio"));
+  const [text, setText] = useState<string>();
+
+  const replay = () => {
+    if (text) {
+      play(text);
+    }
+  };
+
+  const statefulPlay = (input: string) => {
+    setText(input);
+    play(input);
+  };
 
   const play = async (input: string) => {
     const response = await fetch("/api/speech", {
@@ -24,5 +36,5 @@ export const useSpeechPlayback = () => {
     }
     audioRef.current?.play();
   };
-  return { play };
+  return { play: statefulPlay, replay };
 };
