@@ -63,6 +63,7 @@ export function ChatPanel({
         <div className="px-4 py-2 space-y-4 border-t shadow-lg bg-background sm:rounded-t-xl sm:border md:py-4">
           <PromptForm
             onSubmit={async (value) => {
+              console.log("appending");
               await append({
                 id,
                 content: "Antwort", // we told gpt to expect "reply" to continue convo

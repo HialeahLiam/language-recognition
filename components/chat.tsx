@@ -24,6 +24,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { nanoid } from "ai";
+import { useSpeechPlayback } from "../lib/hooks/use-speech-playback";
 
 const IS_PREVIEW = process.env.VERCEL_ENV === "preview";
 
@@ -45,15 +46,8 @@ enum FirstMessage {
 export function Chat({ id, initialMessages, className }: ChatProps) {
   const router = useRouter();
   const path = usePathname();
+  const { play } = useSpeechPlayback();
   const [chatStarted, setChatStarted] = useState(false);
-  //   const [previewToken, setPreviewToken] = useLocalStorage<string | null>(
-  //     "ai-token",
-  //     null
-  //   );
-  //   const [previewTokenDialog, setPreviewTokenDialog] = useState(IS_PREVIEW);
-  //   const [previewTokenInput, setPreviewTokenInput] = useState(
-  //     previewToken ?? ""
-  //   );
   const {
     messages,
     append,
@@ -87,31 +81,12 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
       }
     },
     async onFinish(message) {
-      const response = await fetch("/api/speech", {
-        method: "POST",
-        body: JSON.stringify(
-          {
-            input: message.content,
-          },
-          null,
-          4
-        ),
-      });
-      const body = response.body;
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-
-      if (audioRef.current?.canPlayType("audio/mpeg")) {
-        audioRef.current?.setAttribute("src", blobUrl);
-      }
-      audioRef.current?.play();
+      play(message.content);
     },
   });
 
-  const audioRef = useRef<HTMLAudioElement>(null);
   return (
     <>
-      <audio ref={audioRef} autoPlay={false}></audio>
       <div className={cn("pb-[200px] pt-4 md:pt-10", className)}>
         {chatStarted ? (
           <>
@@ -121,6 +96,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
         ) : (
           <EmptyScreen
             begin={() => {
+              console.log("beginning");
               setChatStarted(true);
               reload();
             }}

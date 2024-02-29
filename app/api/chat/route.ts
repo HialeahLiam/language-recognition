@@ -13,6 +13,7 @@ const openai = new OpenAI({
 
 export async function POST(req: Request) {
   try {
+    console.log("creating response");
     const json = await req.json();
     const { messages, previewToken } = json;
     //   const userId = (await auth())?.user.id;
