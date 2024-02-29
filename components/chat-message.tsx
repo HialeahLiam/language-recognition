@@ -11,24 +11,25 @@ import { MemoizedReactMarkdown } from "@/components/markdown";
 import { IconOpenAI, IconUser } from "@/components/ui/icons";
 import { ChatMessageActions } from "@/components/chat-message-actions";
 import { useMemo } from "react";
+import { Check, X } from "@phosphor-icons/react";
 
 export interface ChatMessageProps {
   // message: Message;
   message: string;
-  isTestedBlank?: boolean;
+  state: "correct" | "incorrect" | "guessing";
 }
 
-export function ChatMessage({
-  message,
-  isTestedBlank = true,
-  ...props
-}: ChatMessageProps) {
+export function ChatMessage({ message, state, ...props }: ChatMessageProps) {
   return (
     <div
-      className={cn("group relative mb-4 flex items-start md:-ml-12")}
+      className={cn("group relative mb-4 flex items-start md:-ml-12 ")}
       {...props}
     >
       <div className="flex-1 px-1 ml-4 space-y-2 overflow-hidden">
+        <div className="absolute -left-20">
+          {state === "correct" && <Check size={32} color="#73A172" />}
+          {state === "incorrect" && <X size={32} color="#A96666" />}
+        </div>
         <MemoizedReactMarkdown
           className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
           remarkPlugins={[remarkGfm]}

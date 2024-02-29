@@ -44,11 +44,11 @@ enum FirstMessage {
   German = "Beginne das Gespräch",
 }
 
-interface Answer {
+export interface Answer {
   text: string;
   messageId: string;
   isCorrect: boolean;
-  // correctAnswer: string;
+  correctAnswer: string;
 }
 
 export function Chat({ id, initialMessages, className }: ChatProps) {
@@ -57,6 +57,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const { play } = useSpeechPlayback();
   const [chatStarted, setChatStarted] = useState(false);
+  const correctAnswerRef = useRef("");
   const {
     messages,
     append,
@@ -104,33 +105,44 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
     return { blanked: words.join(" "), blankedWord };
   }
 
+  function cleanTextSelection(text: string) {
+    return text.trim().replace(/[\p{P}\s]/gu, "");
+  }
+
   const chatMessages = useMemo(() => {
     const assistantMessages = messages.filter((m) => m.role === "assistant");
     const lastMessage = assistantMessages[assistantMessages.length - 1];
 
     const lastAnswer = answers[answers.length - 1];
-    const lastMessageHasBeenAnswered = lastMessage.id === lastAnswer.messageId;
+    const lastMessageHasBeenAnswered =
+      lastMessage?.id === lastAnswer?.messageId;
 
-    const messageStrings = assistantMessages.map((m) => m.content);
-
-    console.log({ assistantMessages, lastMessage });
     if (!lastMessage || lastMessageHasBeenAnswered) {
-      return messageStrings;
+      return assistantMessages;
     }
+
+    const lastMessageCopy = { ...lastMessage };
     const { blanked, blankedWord } = replaceRandomWordWithUnderscore(
-      lastMessage?.content
+      lastMessageCopy?.content
     );
 
-    return [...messageStrings.slice(0, messageStrings.length - 1), blanked];
+    correctAnswerRef.current = cleanTextSelection(blankedWord);
+    lastMessageCopy.content = blanked;
+
+    return [
+      ...assistantMessages.slice(0, assistantMessages.length - 1),
+      lastMessageCopy,
+    ];
   }, [messages]);
 
   const handleGuessSubmit = async (guess: string) => {
     setAnswers((prev) => [
       ...prev,
       {
-        isCorrect: false,
+        isCorrect: guess === correctAnswerRef.current,
         messageId: messages.findLast((m) => m.role === "assistant")!.id,
         text: guess,
+        correctAnswer: correctAnswerRef.current,
       },
     ]);
     await append({
@@ -146,7 +158,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
       <div className={cn("pb-[200px] pt-4 md:pt-10", className)}>
         {chatStarted ? (
           <>
-            <ChatList messages={chatMessages} />
+            <ChatList messages={chatMessages} answers={answers} />
             <ChatScrollAnchor trackVisibility={isLoading} />
           </>
         ) : (
