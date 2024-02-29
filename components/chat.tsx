@@ -43,9 +43,17 @@ enum FirstMessage {
   German = "Beginne das Gespräch",
 }
 
+interface Answer {
+  text: string;
+  messageId: string;
+  isCorrect: boolean;
+  // correctAnswer: string;
+}
+
 export function Chat({ id, initialMessages, className }: ChatProps) {
   const router = useRouter();
   const path = usePathname();
+  const [answers, setAnswers] = useState<Answer[]>([]);
   const { play } = useSpeechPlayback();
   const [chatStarted, setChatStarted] = useState(false);
   const {
@@ -71,10 +79,6 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
       },
     ],
     id,
-    //   body: {
-    //     id,
-    //     previewToken,
-    //   },
     onResponse(response) {
       if (response.status === 401) {
         toast.error(response.statusText);
@@ -84,6 +88,22 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
       play(message.content);
     },
   });
+  const handleGuessSubmit = async (guess: string) => {
+    setAnswers((prev) => [
+      ...prev,
+      {
+        isCorrect: false,
+        messageId: messages.findLast((m) => m.role === "assistant")!.id,
+        text: guess,
+      },
+    ]);
+    await append({
+      content: "Antwort", // we told gpt to expect "reply" to continue convo
+      role: "user",
+    });
+  };
+
+  console.log({ answers });
 
   return (
     <>
@@ -108,7 +128,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
         id={id}
         isLoading={isLoading}
         stop={stop}
-        append={append}
+        submit={handleGuessSubmit}
         reload={reload}
         messages={messages}
         input={input}

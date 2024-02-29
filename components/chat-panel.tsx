@@ -10,16 +10,11 @@ import { FooterText } from "@/components/footer";
 export interface ChatPanelProps
   extends Pick<
     UseChatHelpers,
-    | "append"
-    | "isLoading"
-    | "reload"
-    | "messages"
-    | "stop"
-    | "input"
-    | "setInput"
+    "isLoading" | "reload" | "messages" | "stop" | "input" | "setInput"
   > {
   id?: string;
   title?: string;
+  submit: (input: string) => void;
 }
 
 export function ChatPanel({
@@ -27,7 +22,7 @@ export function ChatPanel({
   title,
   isLoading,
   stop,
-  append,
+  submit,
   reload,
   input,
   setInput,
@@ -62,14 +57,7 @@ export function ChatPanel({
         </div> */}
         <div className="px-4 py-2 space-y-4 border-t shadow-lg bg-background sm:rounded-t-xl sm:border md:py-4">
           <PromptForm
-            onSubmit={async (value) => {
-              console.log("appending");
-              await append({
-                id,
-                content: "Antwort", // we told gpt to expect "reply" to continue convo
-                role: "user",
-              });
-            }}
+            onSubmit={submit}
             input={input}
             setInput={setInput}
             isLoading={isLoading}
