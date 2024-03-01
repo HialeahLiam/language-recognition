@@ -2,9 +2,10 @@
 import React, { useState } from "react";
 import { Chat } from "../../components/chat";
 import { EmptyScreen } from "../../components/empty-screen";
+import { Language } from "../../lib/types";
 
 function EternalConvoPage() {
-  const [lang, setLang] = useState<"english" | "german">();
+  const [lang, setLang] = useState<Language>();
 
   if (lang) {
     return <Chat lang={lang} />;

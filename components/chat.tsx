@@ -7,46 +7,24 @@ import { ChatList } from "@/components/chat-list";
 import { ChatPanel } from "@/components/chat-panel";
 import { EmptyScreen } from "@/components/empty-screen";
 import { ChatScrollAnchor } from "@/components/chat-scroll-anchor";
-// import { useLocalStorage } from "@/lib/hooks/use-local-storage";
-// import {
-//   Dialog,
-//   DialogContent,
-//   DialogDescription,
-//   DialogFooter,
-//   DialogHeader,
-//   DialogTitle,
-// } from "@/components/ui/dialog";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { toast } from "react-hot-toast";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { AIStream, nanoid } from "ai";
 import { useSpeechPlayback } from "../lib/hooks/use-speech-playback";
 import { useMemo } from "react";
+import { useConversation } from "../lib/hooks/use-conversation";
+import { Language } from "../lib/types";
 
 const IS_PREVIEW = process.env.VERCEL_ENV === "preview";
 
 export interface ChatProps extends React.ComponentProps<"div"> {
   initialMessages?: Message[];
   id?: string;
-  lang: "english" | "german";
-}
-
-enum SystemMessage {
-  English = "Pretend you are having a conversation. Every reply should be 2 sentences max. Each of your responses should represent one person. When I say 'reply', switch to the other person. The conversation is never-ending. The participants are close friends. Don't try to be polite. Be creative and genuine with your responses. If a topic drags on, switch topics. Always try to ask the opinion of the other person. Kick off the conversation",
-  German = "Stell dir vor, du führst ein Gespräch. Jede Antwort sollte maximal 2 Sätze lang sein. Jede deiner Antworten sollte eine Person darstellen. Wenn ich 'Antwort' sage, wechsle zur anderen Person. Das Gespräch endet nie. Die Teilnehmer sind enge Freunde. Versuch nicht, höflich zu sein. Sei kreativ und ehrlich mit deinen Antworten. Wenn ein Thema sich zieht, wechsle das Thema. Versuche immer, die Meinung der anderen Person zu erfragen. Starte das Gespräch.",
-}
-
-enum FirstMessage {
-  English = "Begin the conversation",
-  German = "Beginne das Gespräch",
-}
-enum ContinueKeyword {
-  English = "reply",
-  German = "Antwort",
+  lang: Language;
 }
 
 export interface Answer {
@@ -63,60 +41,11 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
   const { play, replay } = useSpeechPlayback();
   const [chatStarted, setChatStarted] = useState(false);
   const correctAnswerRef = useRef("");
-  const PromptConfig = useMemo(() => {
-    switch (lang) {
-      case "english":
-        return {
-          systemMessage: SystemMessage.English,
-          firstMessage: FirstMessage.English,
-          continueKeyword: ContinueKeyword.English,
-        };
-      case "german":
-        return {
-          systemMessage: SystemMessage.German,
-          firstMessage: FirstMessage.German,
-          continueKeyword: ContinueKeyword.German,
-        };
-      default:
-        return {
-          systemMessage: SystemMessage.English,
-          firstMessage: FirstMessage.English,
-          continueKeyword: ContinueKeyword.English,
-        };
-    }
-  }, [lang]);
-
-  const {
-    messages,
-    append,
-    reload,
-    stop,
-    isLoading,
-    input,
-    setInput,
-    handleSubmit,
-  } = useChat({
-    initialMessages: [
-      {
-        id: nanoid(),
-        role: "system",
-        content: PromptConfig.systemMessage,
-      },
-      {
-        id: nanoid(),
-        role: "user",
-        content: PromptConfig.firstMessage,
-      },
-    ],
-    id,
-    onResponse(response) {
-      if (response.status === 401) {
-        toast.error(response.statusText);
-      }
-    },
-    async onFinish(message) {
-      play(message.content);
-    },
+  const [input, setInput] = useState("");
+  const { messages, isLoading, isEnded, next } = useConversation({
+    type: "incremental",
+    lang,
+    onFinish: play,
   });
 
   function replaceRandomWordWithUnderscore(inputString: string) {
@@ -138,15 +67,14 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
   }
 
   const chatMessages = useMemo(() => {
-    const assistantMessages = messages.filter((m) => m.role === "assistant");
-    const lastMessage = assistantMessages[assistantMessages.length - 1];
+    const lastMessage = messages[messages.length - 1];
 
     const lastAnswer = answers[answers.length - 1];
     const lastMessageHasBeenAnswered =
       lastMessage?.id === lastAnswer?.messageId;
 
     if (!lastMessage || lastMessageHasBeenAnswered) {
-      return assistantMessages;
+      return messages;
     }
 
     const lastMessageCopy = { ...lastMessage };
@@ -157,10 +85,7 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
     correctAnswerRef.current = blankedWord;
     lastMessageCopy.content = blanked;
 
-    return [
-      ...assistantMessages.slice(0, assistantMessages.length - 1),
-      lastMessageCopy,
-    ];
+    return [...messages.slice(0, messages.length - 1), lastMessageCopy];
   }, [messages]);
 
   const handleGuessSubmit = async (guess: string) => {
@@ -170,15 +95,12 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
         isCorrect:
           guess === correctAnswerRef.current ||
           guess === cleanTextSelection(correctAnswerRef.current),
-        messageId: messages.findLast((m) => m.role === "assistant")!.id,
+        messageId: messages[messages.length - 1].id,
         text: guess,
         correctAnswer: correctAnswerRef.current,
       },
     ]);
-    await append({
-      content: PromptConfig.continueKeyword, // we told gpt to expect "reply" to continue convo
-      role: "user",
-    });
+    next();
   };
 
   console.log({ answers });
@@ -191,7 +113,7 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
             <Button
               onClick={() => {
                 setChatStarted(true);
-                reload();
+                next();
               }}
               className=""
             >
@@ -211,7 +133,6 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
         isLoading={isLoading}
         stop={stop}
         submit={handleGuessSubmit}
-        reload={reload}
         messages={messages}
         input={input}
         setInput={setInput}

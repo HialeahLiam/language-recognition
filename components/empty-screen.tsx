@@ -1,9 +1,10 @@
 import { UseChatHelpers } from "ai/react";
 
 import { Button } from "@/components/ui/button";
+import { Language } from "../lib/types";
 
 type EmptyScreenProps = {
-  begin: (language: "english" | "german") => void;
+  begin: (language: Language) => void;
 };
 export function EmptyScreen({ begin }: EmptyScreenProps) {
   return (
@@ -14,12 +15,12 @@ export function EmptyScreen({ begin }: EmptyScreenProps) {
         </h1>
         <ul>
           <li>
-            <Button onClick={() => begin("english")} variant={"link"}>
+            <Button onClick={() => begin("ENGLISH")} variant={"link"}>
               English
             </Button>
           </li>
           <li>
-            <Button onClick={() => begin("german")} variant={"link"}>
+            <Button onClick={() => begin("GERMAN")} variant={"link"}>
               German
             </Button>
           </li>

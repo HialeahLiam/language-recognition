@@ -6,16 +6,15 @@ import { PromptForm } from "@/components/prompt-form";
 import { ButtonScrollToBottom } from "@/components/button-scroll-to-bottom";
 import { IconRefresh, IconShare, IconStop } from "@/components/ui/icons";
 import { FooterText } from "@/components/footer";
+import { ConvoMesssage } from "../lib/hooks/use-conversation";
 
 export interface ChatPanelProps
-  extends Pick<
-    UseChatHelpers,
-    "isLoading" | "reload" | "messages" | "stop" | "input" | "setInput"
-  > {
+  extends Pick<UseChatHelpers, "isLoading" | "stop" | "input" | "setInput"> {
   id?: string;
   title?: string;
   submit: (input: string) => void;
   promptDisabled?: boolean;
+  messages: ConvoMesssage[];
 }
 
 export function ChatPanel({
@@ -24,7 +23,6 @@ export function ChatPanel({
   isLoading,
   stop,
   submit,
-  reload,
   input,
   setInput,
   messages,

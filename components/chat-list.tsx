@@ -4,9 +4,10 @@ import { Separator } from "@/components/ui/separator";
 import { ChatMessage } from "@/components/chat-message";
 import { useMemo } from "react";
 import { Answer } from "./chat";
+import { ConvoMesssage } from "../lib/hooks/use-conversation";
 
 export interface ChatList {
-  messages: Message[];
+  messages: ConvoMesssage[];
   // messages: string[];
   answers: Answer[];
   isTestedBlank?: boolean;
