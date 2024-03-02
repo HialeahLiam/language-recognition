@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { Message } from "ai";
 import { useIncremental } from "./useIncremental";
 import { Language } from "../types";
+import { usePregenerated } from "./usePregenerated";
 
 export interface UseConversationReturnType {
   messages: ConvoMesssage[];
@@ -17,7 +18,7 @@ export interface ConvoMesssage extends Pick<Message, "id" | "content"> {
   name?: string;
 }
 
-interface UseConversationProps {
+export interface UseConversationProps {
   type: "pregenerate" | "incremental";
   lang: Language;
   onFinish?: (messageContent: string) => void;
@@ -28,14 +29,12 @@ export const useConversation = ({
   lang,
   onFinish,
 }: UseConversationProps): UseConversationReturnType =>
-  // type === "pregenerate"
-  //   ? usePregenerated()
-  //   :
-  useIncremental({
-    lang,
-    onFinish,
-  });
-
-const usePregenerated = () => {
-  return { messages: [], isLoading: false, isEnded: false, next: () => null };
-};
+  type === "pregenerate"
+    ? usePregenerated({
+        lang,
+        onFinish,
+      })
+    : useIncremental({
+        lang,
+        onFinish,
+      });

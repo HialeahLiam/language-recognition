@@ -43,7 +43,7 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
   const correctAnswerRef = useRef("");
   const [input, setInput] = useState("");
   const { messages, isLoading, isEnded, next } = useConversation({
-    type: "incremental",
+    type: "pregenerate",
     lang,
     onFinish: play,
   });

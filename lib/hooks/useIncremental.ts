@@ -3,13 +3,10 @@ import { nanoid } from "nanoid";
 import { useMemo } from "react";
 import { toast } from "react-hot-toast";
 import { Language } from "../types";
-import { UseConversationReturnType } from "./use-conversation";
-
-interface UseIncrementalProps {
-  id?: string;
-  lang: Language;
-  onFinish?: (messageContent: string) => void;
-}
+import {
+  UseConversationProps,
+  UseConversationReturnType,
+} from "./use-conversation";
 
 enum SystemMessage {
   English = "Pretend you are having a conversation. Every reply should be 2 sentences max. Each of your responses should represent one person. When I say 'reply', switch to the other person. The conversation is never-ending. The participants are close friends. Don't try to be polite. Be creative and genuine with your responses. If a topic drags on, switch topics. Always try to ask the opinion of the other person. Kick off the conversation",
@@ -28,7 +25,7 @@ enum ContinueKeyword {
 export const useIncremental = ({
   lang,
   onFinish,
-}: UseIncrementalProps): UseConversationReturnType => {
+}: Omit<UseConversationProps, "type">): UseConversationReturnType => {
   const PromptConfig = useMemo(() => {
     switch (lang) {
       case "ENGLISH":
