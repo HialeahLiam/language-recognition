@@ -41,6 +41,7 @@ export const usePregenerated = ({
   const [chatPosition, setChatPosition] = useState(0);
   const [chatMessages, setChatMessages] = useState<ConvoMesssage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [prevIsLoading, setPrevIsLoading] = useState(false);
 
   const promptConfig = useMemo(() => PromptConfig(lang), [lang]);
 
@@ -53,8 +54,8 @@ export const usePregenerated = ({
     am.content.split("---").map((m) => m.trim())
   );
 
-  const recentChatMessage = chatMessages?.[chatPosition - 1] || undefined;
-  const recentMessage = splitMessages?.[chatPosition - 1] || undefined;
+  const recentChatMessage = chatMessages?.[chatPosition - 1];
+  const recentMessage: string | undefined = splitMessages?.[chatPosition - 1];
 
   if (recentMessage && recentChatMessage?.content !== recentMessage) {
     setChatMessages((prev) => [
@@ -67,35 +68,21 @@ export const usePregenerated = ({
     ]);
   }
 
-  useEffect(() => {
-    /**
-     * We do this to solve race condition. We might call the LLM API and then setIsLoading(true),
-     * but the isLLMLoading sometimes does not become true before we check to set isLoading to false.
-     *
-     * We know that if isLLMLoading changes false ->, we just fetched an answer from LLM and our chat message
-     * MUST be loading.
-     */
-    if (isLLMLoading) setIsLoading(true);
-  }, [isLLMLoading]);
+  if (prevIsLoading && !isLoading && onFinish && recentChatMessage) {
+    setPrevIsLoading(isLoading);
+    onFinish(recentChatMessage.content);
+  }
 
-  useEffect(() => {
-    /**
-     * Sometimes condition is true when recentChatMessage is undefined.
-     * This happens when isLoading is switched true -> false before isLLMLoading
-     * even has a chance to turn on false -> true
-     */
-    if (!isLoading && onFinish && recentChatMessage) {
-      onFinish(recentChatMessage.content);
-    }
-  }, [isLoading]);
-
-  useEffect(() => {
-    const isChatArrayBehindMessagesArray =
-      chatMessages.length < splitMessages.length;
-    if (isChatArrayBehindMessagesArray || !isLLMLoading) {
-      setIsLoading(false);
-    }
-  }, [chatMessages, isLLMLoading]);
+  const isChatArrayBehindMessagesArray =
+    chatMessages.length < splitMessages.length;
+  if (
+    isLoading &&
+    recentChatMessage?.content === recentMessage &&
+    (isChatArrayBehindMessagesArray || !isLLMLoading)
+  ) {
+    setPrevIsLoading(isLoading);
+    setIsLoading(false);
+  }
 
   function next() {
     if (messages.length === 0) {
@@ -104,6 +91,7 @@ export const usePregenerated = ({
         role: "user",
       });
     }
+    setPrevIsLoading(isLoading);
     setIsLoading(true);
     setChatPosition((prev) => prev + 1);
   }
