@@ -103,7 +103,7 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
     next();
   };
 
-  console.log({ answers });
+  // console.log({ answers });
 
   return (
     <>

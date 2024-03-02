@@ -37,7 +37,7 @@ export const usePregenerated = ({
   lang,
   onFinish,
 }: Omit<UseConversationProps, "type">): UseConversationReturnType => {
-  const { messages, append } = useChat({});
+  const { messages, append, isLoading: isLLMLoading } = useChat({});
   const [chatPosition, setChatPosition] = useState(0);
   const [chatMessages, setChatMessages] = useState<ConvoMesssage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,15 +49,15 @@ export const usePregenerated = ({
     return assistantMessages;
   }, [messages]);
 
-  const splitMessage = assistantMessages[0]?.content
-    .split("---")
-    .map((m) => m.trim());
+  const splitMessages = assistantMessages.flatMap((am) =>
+    am.content.split("---").map((m) => m.trim())
+  );
 
   const recentChatMessage = chatMessages?.[chatPosition - 1];
-  const recentMessage = splitMessage?.[chatPosition - 1];
+  const recentMessage = splitMessages?.[chatPosition - 1];
 
   useEffect(() => {
-    if (splitMessage) {
+    if (splitMessages) {
       if (recentChatMessage?.content !== recentMessage) {
         setChatMessages((prev) => [
           ...prev.slice(0, chatPosition - 1),
@@ -71,6 +71,36 @@ export const usePregenerated = ({
     }
   }, [messages, chatPosition]);
 
+  useEffect(() => {
+    /**
+     * We do this to solve race condition. We might call the LLM API and then setIsLoading(true),
+     * but the isLLMLoading sometimes does not become true before we check to set isLoading to false.
+     *
+     * We know that if isLLMLoading changes false ->, we just fetched an answer from LLM and our chat message
+     * MUST be loading.
+     */
+    if (isLLMLoading) setIsLoading(true);
+  }, [isLLMLoading]);
+
+  useEffect(() => {
+    /**
+     * Sometimes condition is true when recentChatMessage is undefined.
+     * This happens when isLoading is switched true -> false before isLLMLoading
+     * even has a chance to turn on false -> true
+     */
+    if (!isLoading && onFinish && recentChatMessage) {
+      onFinish(recentChatMessage.content);
+    }
+  }, [isLoading]);
+
+  useEffect(() => {
+    const isChatArrayBehindMessagesArray =
+      chatMessages.length < splitMessages.length;
+    if (isChatArrayBehindMessagesArray || !isLLMLoading) {
+      setIsLoading(false);
+    }
+  }, [chatMessages, isLLMLoading]);
+
   function next() {
     if (messages.length === 0) {
       append({
@@ -82,13 +112,9 @@ export const usePregenerated = ({
     setChatPosition((prev) => prev + 1);
   }
 
-  console.log({ assistantMessages });
-  console.log({ splitMessage });
-  console.log({ chatMessages });
-
   return {
-    isEnded: splitMessage?.length === chatPosition,
-    isLoading: false,
+    isEnded: splitMessages?.length === chatPosition,
+    isLoading,
     messages: chatMessages,
     next,
   };
