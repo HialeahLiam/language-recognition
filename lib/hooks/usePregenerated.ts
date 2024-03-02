@@ -53,23 +53,19 @@ export const usePregenerated = ({
     am.content.split("---").map((m) => m.trim())
   );
 
-  const recentChatMessage = chatMessages?.[chatPosition - 1];
-  const recentMessage = splitMessages?.[chatPosition - 1];
+  const recentChatMessage = chatMessages?.[chatPosition - 1] || undefined;
+  const recentMessage = splitMessages?.[chatPosition - 1] || undefined;
 
-  useEffect(() => {
-    if (splitMessages) {
-      if (recentChatMessage?.content !== recentMessage) {
-        setChatMessages((prev) => [
-          ...prev.slice(0, chatPosition - 1),
-          {
-            ...recentChatMessage,
-            id: nanoid(),
-            content: recentMessage,
-          },
-        ]);
-      }
-    }
-  }, [messages, chatPosition]);
+  if (recentMessage && recentChatMessage?.content !== recentMessage) {
+    setChatMessages((prev) => [
+      ...prev.slice(0, chatPosition - 1),
+      {
+        ...recentChatMessage,
+        id: nanoid(),
+        content: recentMessage,
+      },
+    ]);
+  }
 
   useEffect(() => {
     /**
