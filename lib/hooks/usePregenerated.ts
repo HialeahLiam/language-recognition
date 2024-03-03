@@ -97,7 +97,7 @@ export const usePregenerated = ({
   }
 
   return {
-    isEnded: splitMessages?.length === chatPosition,
+    isEnded: splitMessages?.length === chatPosition && !isLLMLoading,
     isLoading,
     messages: chatMessages,
     next,

@@ -48,6 +48,8 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
     onFinish: play,
   });
 
+  if (isEnded) console.log("done");
+
   function replaceRandomWordWithUnderscore(inputString: string) {
     const words = inputString.split(" ");
 
