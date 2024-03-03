@@ -54,6 +54,8 @@ export const usePregenerated = ({
     am.content.split("---").map((m) => m.trim())
   );
 
+  const isEnded = splitMessages?.length === chatPosition && !isLLMLoading;
+
   const recentChatMessage = chatMessages?.[chatPosition - 1];
   const recentMessage: string | undefined = splitMessages?.[chatPosition - 1];
 
@@ -85,7 +87,7 @@ export const usePregenerated = ({
   }
 
   function next() {
-    if (messages.length === 0) {
+    if (isEnded) {
       append({
         content: promptConfig.firstMessage,
         role: "user",
@@ -97,7 +99,7 @@ export const usePregenerated = ({
   }
 
   return {
-    isEnded: splitMessages?.length === chatPosition && !isLLMLoading,
+    isEnded,
     isLoading,
     messages: chatMessages,
     next,

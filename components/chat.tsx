@@ -48,8 +48,6 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
     onFinish: play,
   });
 
-  if (isEnded) console.log("done");
-
   function replaceRandomWordWithUnderscore(inputString: string) {
     const words = inputString.split(" ");
 
@@ -102,10 +100,14 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
         correctAnswer: correctAnswerRef.current,
       },
     ]);
-    next();
+
+    if (!isEnded) {
+      next();
+    }
   };
 
   // console.log({ answers });
+  console.log({ isEnded, answers, messages });
 
   return (
     <>
@@ -128,6 +130,11 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
           answers={answers}
           replaySpeech={replay}
         />
+        {chatStarted && isEnded && answers.length === messages.length && (
+          <div className="flex justify-center">
+            <span>Conversation has ended.</span>
+          </div>
+        )}
         <ChatScrollAnchor trackVisibility={isLoading} />
       </div>
       <ChatPanel
