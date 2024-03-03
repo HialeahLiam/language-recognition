@@ -11,6 +11,7 @@ export interface UseConversationReturnType {
   messages: ConvoMesssage[];
   isLoading: boolean;
   isEnded: boolean;
+  newConvo: () => void;
   next: () => void;
 }
 

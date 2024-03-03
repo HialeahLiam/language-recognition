@@ -37,11 +37,18 @@ export const usePregenerated = ({
   lang,
   onFinish,
 }: Omit<UseConversationProps, "type">): UseConversationReturnType => {
-  const { messages, append, isLoading: isLLMLoading } = useChat({});
+  const {
+    messages,
+    append,
+    isLoading: isLLMLoading,
+    setMessages,
+    reload,
+  } = useChat({});
   const [chatPosition, setChatPosition] = useState(0);
   const [chatMessages, setChatMessages] = useState<ConvoMesssage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [prevIsLoading, setPrevIsLoading] = useState(false);
+  const [convoHasStarted, setConvoHasStarted] = useState(false);
 
   const promptConfig = useMemo(() => PromptConfig(lang), [lang]);
 
@@ -98,10 +105,27 @@ export const usePregenerated = ({
     setChatPosition((prev) => prev + 1);
   }
 
+  useEffect(() => {
+    if (convoHasStarted) {
+      setConvoHasStarted(false);
+      next();
+    }
+  }, [convoHasStarted]);
+
+  console.log({ messages });
+
+  function newConvo() {
+    setMessages([]);
+    setChatMessages([]);
+    setChatPosition(0);
+    setConvoHasStarted(true);
+  }
+
   return {
     isEnded,
     isLoading,
     messages: chatMessages,
     next,
+    newConvo,
   };
 };

@@ -39,14 +39,21 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
   const path = usePathname();
   const [answers, setAnswers] = useState<Answer[]>([]);
   const { play, replay } = useSpeechPlayback();
-  const [chatStarted, setChatStarted] = useState(false);
   const correctAnswerRef = useRef("");
   const [input, setInput] = useState("");
-  const { messages, isLoading, isEnded, next } = useConversation({
+  const { messages, isLoading, isEnded, next, newConvo } = useConversation({
     type: "pregenerate",
     lang,
     onFinish: play,
   });
+
+  const chatStarted = isLoading || messages.length !== 0;
+  const chatCompleteAndAnswered = isEnded && answers.length === messages.length;
+
+  function startNewConversation() {
+    setAnswers([]);
+    newConvo();
+  }
 
   function replaceRandomWordWithUnderscore(inputString: string) {
     const words = inputString.split(" ");
@@ -106,9 +113,6 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
     }
   };
 
-  // console.log({ answers });
-  console.log({ isEnded, answers, messages });
-
   return (
     <>
       <div className={cn("pb-[200px] pt-4 md:pt-10", className)}>
@@ -116,7 +120,6 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
           <div className=" flex justify-center ">
             <Button
               onClick={() => {
-                setChatStarted(true);
                 next();
               }}
               className=""
@@ -130,9 +133,12 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
           answers={answers}
           replaySpeech={replay}
         />
-        {chatStarted && isEnded && answers.length === messages.length && (
+        {chatStarted && chatCompleteAndAnswered && (
           <div className="flex justify-center">
             <span>Conversation has ended.</span>
+            <Button onClick={startNewConversation}>
+              Start new conversation
+            </Button>
           </div>
         )}
         <ChatScrollAnchor trackVisibility={isLoading} />
@@ -145,7 +151,7 @@ export function Chat({ id, initialMessages, className, lang }: ChatProps) {
         messages={messages}
         input={input}
         setInput={setInput}
-        promptDisabled={!chatStarted}
+        promptDisabled={!chatStarted || chatCompleteAndAnswered}
       />
     </>
   );
